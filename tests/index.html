@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pruebas</title>
+    <style>
+      body { font: 15px/1.5 system-ui, sans-serif; margin: 2rem auto; max-width: 60rem; padding: 0 1rem; color: #1b2033; }
+      #summary { font-size: 1.25rem; font-weight: 600; }
+      ul { padding: 0; list-style: none; }
+      li { padding: 0.15rem 0; }
+      .pass { color: #1d6b3a; }
+      .fail { color: #b42318; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <p id="summary">Ejecutando pruebas…</p>
+    <ul id="results"></ul>
+    <script type="module">
+      import { run } from './runner.js'
+      import './auth.test.js'
+      import './store.test.js'
+      import './attempts.test.js'
+      run()
+    </script>
+  </body>
+</html>

@@ -1,0 +1,573 @@
+/* Fonts are local files (no internet needed). Latin covers Spanish; latin-ext covers rarer letters in names. */
+@font-face {
+  font-family: 'Alegreya';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url(../fonts/alegreya-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Alegreya';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url(../fonts/alegreya-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url(../fonts/archivo-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url(../fonts/archivo-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Placeholder palette until the school's colors arrive (plan.md, Q1). */
+:root {
+  --papel: #f5f6f3; /* bond paper */
+  --hoja: #ffffff; /* form surfaces */
+  --tinta: #1b2033; /* blue-black ink: body text */
+  --sello: #2f3c8c; /* stamp ink: primary */
+  --sello-hondo: #232d6e;
+  --sello-tenue: #e7e9f4;
+  --grafito: #5a6072; /* secondary text */
+  --raya: #d6d9e1; /* rules and borders */
+  --rojo: #b42318; /* red pen: errors */
+  --rojo-tenue: #fdecea;
+
+  --font-display: 'Alegreya', Georgia, serif;
+  --font-sans: 'Archivo', system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body,
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+:focus-visible {
+  outline: 2px solid var(--sello);
+  outline-offset: 2px;
+}
+[hidden] {
+  display: none !important;
+}
+
+/* ---------- Welcome screens: seal on the left, school + current step on the right ---------- */
+
+.frame {
+  display: grid;
+  align-content: center;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+  max-width: 72rem;
+  min-height: 100dvh;
+  margin-inline: auto;
+  padding: 2.5rem 1rem;
+}
+.frame-seal {
+  display: flex;
+  justify-content: center;
+}
+.frame-seal .seal {
+  width: 10rem;
+}
+.frame-main {
+  width: 100%;
+  max-width: 28rem;
+  margin-inline: auto;
+}
+.school {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+.school-type {
+  display: block;
+  font-size: 1.25rem;
+  line-height: 1.25;
+  font-weight: 500;
+  color: var(--grafito);
+}
+.school-name {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 2.375rem;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+.step {
+  margin-top: 2.5rem;
+}
+.step-title {
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+  line-height: 1.25;
+  font-weight: 600;
+}
+.step-title + * {
+  margin-top: 1.5rem;
+}
+.stack > * + * {
+  margin-top: 1rem;
+}
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  margin-top: 1.25rem;
+}
+.note {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--raya);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--grafito);
+}
+.separated {
+  padding-top: 1rem;
+  border-top: 1px solid var(--raya);
+}
+.step > .alert {
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .frame {
+    padding-inline: 2rem;
+  }
+  .frame-seal .seal {
+    width: 13rem;
+  }
+  .school-type {
+    font-size: 1.5rem;
+  }
+  .school-name {
+    font-size: 3.25rem;
+  }
+  .actions {
+    flex-direction: row;
+  }
+}
+@media (min-width: 1024px) {
+  .frame {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 28rem);
+    align-items: start;
+    gap: 5rem;
+    padding-inline: 3rem;
+  }
+  .frame-seal {
+    position: sticky;
+    top: 2.5rem;
+  }
+  .frame-seal .seal {
+    width: 23rem;
+  }
+  .frame-main {
+    margin-inline: 0;
+  }
+}
+@media (min-width: 1536px) {
+  .frame-seal .seal {
+    width: 26rem;
+  }
+}
+
+/* ---------- The seal lands like a rubber stamp once, on first load ---------- */
+
+.seal {
+  display: block;
+  transform: rotate(-7deg);
+}
+.seal.stamping {
+  animation: stamp 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes stamp {
+  from {
+    transform: scale(1.14) rotate(-14deg);
+    opacity: 0;
+  }
+  55% {
+    opacity: 1;
+  }
+  to {
+    transform: scale(1) rotate(-7deg);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .seal.stamping {
+    animation: none;
+  }
+}
+
+/* ---------- Form fields ---------- */
+
+.field-label {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+.field-hint {
+  margin-top: 0.125rem;
+  font-size: 0.875rem;
+  color: var(--grafito);
+}
+.field-box {
+  position: relative;
+  margin-top: 0.375rem;
+}
+.input {
+  width: 100%;
+  height: 2.75rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--raya);
+  border-radius: 0.5rem;
+  background: var(--hoja);
+  font-size: 1rem;
+  outline: none;
+  transition:
+    border-color 150ms,
+    box-shadow 150ms;
+}
+.input:focus {
+  border-color: var(--sello);
+  box-shadow: 0 0 0 3px rgb(47 60 140 / 0.15);
+}
+.input[aria-invalid='true'] {
+  border-color: var(--rojo);
+}
+.input:disabled {
+  background: var(--papel);
+}
+.input.has-toggle {
+  padding-right: 5.5rem;
+}
+.toggle {
+  position: absolute;
+  inset: 0.25rem 0.25rem 0.25rem auto;
+  padding: 0 0.75rem;
+  border: 0;
+  border-radius: 0.375rem;
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--sello);
+}
+.toggle:hover {
+  background: var(--sello-tenue);
+}
+.field-error {
+  margin-top: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--rojo);
+}
+.select {
+  height: 2.5rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--raya);
+  border-radius: 0.5rem;
+  background: var(--hoja);
+  font-size: 1rem;
+}
+.select:focus {
+  border-color: var(--sello);
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 2.75rem;
+  padding: 0 1.25rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition:
+    background-color 150ms,
+    border-color 150ms,
+    transform 150ms;
+}
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.btn-primary {
+  background: var(--sello);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--sello-hondo);
+}
+.btn-primary:disabled {
+  background: rgb(90 96 114 / 0.5);
+}
+.btn-secondary {
+  border-color: var(--raya);
+  background: var(--hoja);
+}
+.btn-secondary:hover:not(:disabled) {
+  border-color: rgb(90 96 114 / 0.6);
+}
+.btn-secondary:disabled {
+  color: var(--grafito);
+}
+.btn-small {
+  height: 2.25rem;
+  padding: 0 0.75rem;
+}
+.btn-block {
+  width: 100%;
+}
+.link {
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: none;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--sello);
+  text-decoration: underline;
+  text-decoration-color: rgb(47 60 140 / 0.35);
+  text-underline-offset: 4px;
+}
+.link:hover {
+  text-decoration-color: var(--sello);
+}
+.spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Messages ---------- */
+
+.alert {
+  padding: 0.625rem 0.875rem;
+  border-left: 3px solid var(--rojo);
+  border-radius: 0.5rem;
+  background: var(--rojo-tenue);
+  font-size: 0.9375rem;
+  color: var(--rojo);
+}
+.alert.info {
+  border-color: var(--sello);
+  background: var(--sello-tenue);
+  color: var(--tinta);
+}
+
+/* ---------- App shell ---------- */
+
+.topbar {
+  border-bottom: 1px solid var(--raya);
+  background: var(--hoja);
+}
+.topbar-inner,
+.page {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 4rem;
+}
+.mark {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+}
+.app-name {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+.user-name {
+  display: none;
+  margin-right: 0.5rem;
+  font-size: 0.9375rem;
+  color: var(--grafito);
+}
+.page {
+  padding-block: 3rem;
+}
+.greeting {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  line-height: 1.2;
+  font-weight: 600;
+}
+@media (min-width: 640px) {
+  .topbar-inner,
+  .page {
+    padding-inline: 2rem;
+  }
+  .user-name {
+    display: inline;
+  }
+}
+
+/* ---------- Security dialog ---------- */
+
+.dialog {
+  width: min(34rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  padding: 1.5rem;
+  border: 0;
+  border-radius: 1rem;
+  background: var(--papel);
+  color: var(--tinta);
+  box-shadow: 0 25px 50px -12px rgb(27 32 51 / 0.35);
+}
+.dialog::backdrop {
+  background: rgb(27 32 51 / 0.4);
+}
+.dialog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.dialog-title {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  line-height: 1.25;
+  font-weight: 600;
+}
+.section {
+  border-top: 1px solid var(--raya);
+}
+.section summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-inline: -0.5rem;
+  padding: 1rem 0.5rem;
+  border-radius: 0.5rem;
+  list-style: none;
+  cursor: pointer;
+}
+.section summary::-webkit-details-marker {
+  display: none;
+}
+.section summary:hover {
+  background: rgb(231 233 244 / 0.5);
+}
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+.section-state {
+  flex-shrink: 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--sello);
+}
+.section[open] .section-state {
+  color: var(--grafito);
+}
+.section-body {
+  padding-bottom: 1.5rem;
+}
+.lock-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-top: 0.5rem;
+  font-size: 0.9375rem;
+}
+.saved {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--grafito);
+}
+@media (min-width: 640px) {
+  .dialog {
+    padding: 2rem;
+  }
+}
+
+.lead {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: rgb(27 32 51 / 0.85);
+  text-wrap: pretty;
+}
+.spinner {
+  display: inline-block;
+  vertical-align: -0.15em;
+}
+.section:not([open]) .when-open,
+.section[open] .when-closed {
+  display: none;
+}
