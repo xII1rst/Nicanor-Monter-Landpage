@@ -1,12 +1,17 @@
 // Entry point: decides which screen to show and moves between them.
 import { hashSecret, verifySecret } from './data/auth.js'
 import { createDataFile, ensureAccess, fileAccessSupported, pickDataFile, readDataFile, rememberedFile, writeDataFile } from './data/file.js'
+import { createSaver } from './data/saver.js'
 import { newDataFile } from './data/store.js'
 import { startIdleLock, stopIdleLock } from './idle.js'
 import { forgotScreen } from './screens/forgot.js'
 import { gateScreen } from './screens/gate.js'
 import { setupScreen } from './screens/setup.js'
-import { shellScreen } from './screens/shell.js'
+import { ajustesView } from './screens/ajustes.js'
+import { asignaturasView } from './screens/asignaturas.js'
+import { gruposView } from './screens/grupos.js'
+import { notasView } from './screens/notas.js'
+import { saveStatusEl, shellScreen } from './screens/shell.js'
 import { startScreen } from './screens/start.js'
 import { unsupportedScreen } from './screens/unsupported.js'
 import { mount } from './ui/dom.js'
@@ -16,8 +21,50 @@ import { mount } from './ui/dom.js'
 const local = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)
 if ('serviceWorker' in navigator && !local) navigator.serviceWorker.register('sw.js')
 
-/** The open data file and its contents, once the person is in. */
+/** Once the person is in: the open file, its data, and the queue that saves it. */
 let session = null
+let view = 'notas'
+let saveStatus = null
+const VIEWS = { notas: notasView, grupos: gruposView, asignaturas: asignaturasView, ajustes: ajustesView }
+
+// What the sections use to read and change the data.
+const app = {
+  get data() {
+    return session.data
+  },
+  /** Applies a change right away; it is written to the file in the background. */
+  commit(next) {
+    const lockChanged = next.settings.lockMinutes !== session.data.settings.lockMinutes
+    session.data = next
+    session.saver.save(next)
+    if (lockChanged) startIdleLock(next.settings.lockMinutes, lock)
+  },
+  /** Same, but waits until it's on disk (used for password changes). */
+  async commitNow(next) {
+    app.commit(next)
+    await session.saver.settled()
+  },
+  go(name) {
+    view = name
+    showApp()
+  },
+  /** Redraws the current section, optionally focusing an element marked data-focus-key. */
+  refresh(focusKey) {
+    showApp(focusKey)
+  },
+  lock: () => lock(),
+  retrySave: () => session.saver.retry(),
+}
+
+function showSaveStatus(status) {
+  saveStatus = status
+  document.getElementById('save-status')?.replaceWith(saveStatusEl(app, status))
+}
+
+// Closing the window while a save is still running would lose the last change.
+window.addEventListener('beforeunload', (event) => {
+  if (session?.saver.pending) event.preventDefault()
+})
 
 // The person's name, kept outside the data file so the login can greet them
 // before the browser grants access to the file.
@@ -127,22 +174,18 @@ function showSetup(handle, data) {
 function enter(handle, data) {
   if (!data.auth) return showSetup(handle, data)
   rememberName(data.auth.name)
-  session = { handle, data }
+  session = { handle, data, saver: createSaver((next) => writeDataFile(handle, next), showSaveStatus) }
   showApp()
 }
 
-function showApp() {
-  mount(
-    shellScreen({
-      getData: () => session.data,
-      onLock: lock,
-      onSave: async (next) => {
-        await writeDataFile(session.handle, next)
-        session.data = next
-        startIdleLock(next.settings.lockMinutes, lock)
-      },
-    }),
-  )
+function showApp(focusKey) {
+  const scroll = focusKey ? window.scrollY : 0
+  const content = VIEWS[view](app)
+  mount(shellScreen({ app, view, content, saveStatus }))
+  if (focusKey) {
+    window.scrollTo(0, scroll)
+    document.querySelector(`[data-focus-key="${focusKey}"]`)?.focus({ preventScroll: true })
+  }
   startIdleLock(session.data.settings.lockMinutes, lock)
 }
 

@@ -1,14 +1,17 @@
 import { brand } from '../brand.js'
-import { button } from '../ui/controls.js'
+import { button, linkButton } from '../ui/controls.js'
 import { h } from '../ui/dom.js'
-import { sealMark } from '../ui/seal.js'
-import { securityDialog } from './security.js'
+import { escudoMark } from '../ui/escudo.js'
 
-// App frame after entering. Groups, students and grade entry arrive in Phase 2.
-export function shellScreen({ getData, onLock, onSave }) {
-  const name = getData().auth?.name ?? ''
-  const security = securityDialog({ getData, onSave })
+export const SECTIONS = [
+  ['notas', 'Notas'],
+  ['grupos', 'Grupos'],
+  ['asignaturas', 'Asignaturas'],
+  ['ajustes', 'Ajustes'],
+]
 
+// App frame after entering: escudo, sections, save status, name and lock.
+export function shellScreen({ app, view, content, saveStatus }) {
   return h(
     'div',
     {},
@@ -18,18 +21,31 @@ export function shellScreen({ getData, onLock, onSave }) {
       h(
         'div',
         { class: 'topbar-inner' },
-        sealMark(),
+        escudoMark(),
         h('span', { class: 'app-name' }, brand.appName),
+        h(
+          'nav',
+          { class: 'tabs', 'aria-label': 'Secciones' },
+          SECTIONS.map(([id, label]) => h('button', { type: 'button', class: 'tab', 'aria-current': id === view ? 'page' : null, onclick: () => app.go(id) }, label)),
+        ),
         h(
           'div',
           { class: 'topbar-actions' },
-          h('span', { class: 'user-name' }, name),
-          button('Seguridad', { variant: 'secondary', small: true, onclick: security.open }),
-          button('Bloquear', { variant: 'secondary', small: true, onclick: onLock }),
+          saveStatusEl(app, saveStatus),
+          h('span', { class: 'user-name' }, app.data.auth.name),
+          button('Bloquear', { variant: 'secondary', small: true, onclick: app.lock }),
         ),
       ),
     ),
-    h('main', { class: 'page' }, h('h1', { class: 'greeting' }, `Hola, ${name.split(' ')[0]}`)),
-    security.el,
+    h('main', { class: 'page', id: 'view' }, content),
   )
+}
+
+/** "Guardando…", "Guardado" or a failure with a retry button. Updated in place by main.js. */
+export function saveStatusEl(app, status) {
+  const el = h('span', { id: 'save-status', class: status === 'error' ? 'save-status error' : 'save-status', role: 'status' })
+  if (status === 'saving') el.textContent = 'Guardando…'
+  else if (status === 'saved') el.textContent = 'Guardado'
+  else if (status === 'error') el.append('No se pudo guardar', linkButton('Reintentar', app.retrySave))
+  return el
 }

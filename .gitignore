@@ -1,3 +1,9 @@
+# Anything that must stay off GitHub (real students' boletines, tool output) goes in noCommit/
+/noCommit/
+.~lock.*
+
+# Machine-specific files that have to stay where they are
 .directory
+.vscode/
 .vercel
 .playwright-mcp

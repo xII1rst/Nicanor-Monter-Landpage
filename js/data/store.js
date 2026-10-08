@@ -5,7 +5,7 @@
 //   app: 'notas-nma', version: 1,
 //   settings: { schoolName, year, levels: [{ name, min, max }], decimals, lockMinutes },
 //   auth?:    { name, password: SecretHash, recovery: SecretHash },
-//   groups:   [{ id, name, gradeLevel, subjectIds }],
+//   groups:   [{ id, name, gradeLevel, section, subjectIds }],   (subjectIds in boletín order)
 //   subjects: [{ id, name, area }],
 //   students: [{ id, groupId, apellidos, nombres, documento? }],
 //   grades:   { [studentId]: { [subjectId]: [p1, p2, p3, p4] } }   (null = not entered yet)

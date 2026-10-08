@@ -28,7 +28,8 @@ If you add a new file the app needs offline, also add it to the `FILES` list in 
 
 ## Branding
 
-- Escudo: put the image in `brand/` (e.g. `brand/escudo.png`) and set `logoSrc` in `js/brand.js`.
+- Escudo: `brand/escudo.png` (made from the scan `brand/escudo-ienma.pdf`, white background removed). Path set in `js/brand.js`.
+- App icons and favicon (`icons/`, `favicon.png`) are made from the same escudo.
 - Colors: `css/styles.css` (`:root`).
 
 ## Layout
@@ -38,7 +39,7 @@ index.html            the page
 css/styles.css        all styles
 js/main.js            decides which screen to show
 js/screens/           one file per screen
-js/ui/                small building blocks (fields, buttons, seal)
+js/ui/                small building blocks (fields, buttons, escudo)
 js/data/              data file format, file access, password hashing
 sw.js                 offline support
 tests/                in-browser tests
