@@ -1,5 +1,5 @@
 // Everything that identifies the school lives here. Colors live in css/styles.css (:root).
-// The escudo PNG was made from brand/escudo-ienma.pdf (a scan): white background removed.
+// The escudo PNG was made from the school's scanned escudo: white background removed.
 
 export const brand = {
   schoolName: 'Institución Educativa Nicanor Montero Arias',

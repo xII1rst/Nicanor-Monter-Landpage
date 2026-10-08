@@ -2,7 +2,6 @@
 
 Registro de notas y boletines de la Institución Educativa Nicanor Montero Arias.
 Offline Progressive Web App in plain HTML, CSS and JavaScript: no Node, no install, no build step.
-Product plan and status: [plan.md](plan.md).
 
 ## Review it
 
@@ -28,7 +27,7 @@ If you add a new file the app needs offline, also add it to the `FILES` list in 
 
 ## Branding
 
-- Escudo: `brand/escudo.png` (made from the scan `brand/escudo-ienma.pdf`, white background removed). Path set in `js/brand.js`.
+- Escudo: `brand/escudo.png` (made from the school's scanned escudo, white background removed). Path set in `js/brand.js`.
 - App icons and favicon (`icons/`, `favicon.png`) are made from the same escudo.
 - Colors: `css/styles.css` (`:root`).
 

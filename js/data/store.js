@@ -18,7 +18,7 @@ export function newDataFile(year) {
     settings: {
       schoolName: 'Institución Educativa Nicanor Montero Arias',
       year,
-      // Placeholder cut-offs until the school confirms its SIEE (plan.md, Q3).
+      // Placeholder cut-offs until the school confirms its SIEE.
       levels: [
         { name: 'Bajo', min: 0, max: 59 },
         { name: 'Básico', min: 60, max: 79 },
