@@ -1,5 +1,4 @@
-import { levelsFromMins } from '../data/grades.js'
-import { hasDecimalGrades } from '../data/model.js'
+import { formatGrade, levelsFromMins } from '../data/grades.js'
 import { serializeDataFile } from '../data/store.js'
 import { alertBox, button } from '../ui/controls.js'
 import { h, uid } from '../ui/dom.js'
@@ -11,7 +10,7 @@ export function ajustesView(app) {
     'div',
     { class: 'settings' },
     h('h1', { class: 'page-title' }, 'Ajustes'),
-    h('div', { class: 'section-gap' }, yearBlock(app), levelsBlock(app), decimalsBlock(app), backupBlock(app), securityBlock(security)),
+    h('div', { class: 'section-gap' }, yearBlock(app), levelsBlock(app), backupBlock(app), securityBlock(security)),
     security.el,
   )
 }
@@ -19,6 +18,8 @@ export function ajustesView(app) {
 function block(title, ...content) {
   return h('section', { class: 'block' }, h('h2', { class: 'block-title' }, title), ...content)
 }
+
+const GRADE_INPUT = { min: 0.1, max: 10, step: 0.1, inputmode: 'decimal' }
 
 function numberInput(id, value, attrs = {}) {
   return h('input', { class: 'input input-narrow', id, type: 'number', inputmode: 'numeric', value, ...attrs })
@@ -44,17 +45,17 @@ function yearBlock(app) {
 }
 
 function levelsBlock(app) {
-  const { levels, decimals } = app.data.settings
+  const { levels } = app.data.settings
   const ids = { basico: uid('basico'), alto: uid('alto'), superior: uid('superior') }
   const inputs = {
-    basico: numberInput(ids.basico, levels[1].min, { min: 1, max: 100 }),
-    alto: numberInput(ids.alto, levels[2].min, { min: 1, max: 100 }),
-    superior: numberInput(ids.superior, levels[3].min, { min: 1, max: 100 }),
+    basico: numberInput(ids.basico, levels[1].min, GRADE_INPUT),
+    alto: numberInput(ids.alto, levels[2].min, GRADE_INPUT),
+    superior: numberInput(ids.superior, levels[3].min, GRADE_INPUT),
   }
   const ranges = h('ul', { class: 'ranges', 'aria-live': 'polite' })
   const alert = alertBox()
-  const read = () => levelsFromMins({ basico: Number(inputs.basico.value), alto: Number(inputs.alto.value), superior: Number(inputs.superior.value) }, decimals)
-  const show = (list) => ranges.replaceChildren(...list.map((l) => h('li', {}, `${l.name}: ${String(l.min).replace('.', ',')} a ${String(l.max).replace('.', ',')}`)))
+  const read = () => levelsFromMins({ basico: Number(inputs.basico.value), alto: Number(inputs.alto.value), superior: Number(inputs.superior.value) })
+  const show = (list) => ranges.replaceChildren(...list.map((l) => h('li', {}, `${l.name}: ${formatGrade(l.min)} a ${formatGrade(l.max)}`)))
 
   function preview() {
     try {
@@ -89,23 +90,6 @@ function levelsBlock(app) {
     }
   })
   return block('Desempeños', h('p', { class: 'hint' }, 'Nota mínima de cada desempeño. Bajo va desde 0.'), form, ranges, h('div', { class: 'section-gap' }, alert.el))
-}
-
-function decimalsBlock(app) {
-  const box = h('input', { type: 'checkbox', checked: app.data.settings.decimals })
-  const alert = alertBox()
-  box.addEventListener('change', () => {
-    const decimals = box.checked
-    const data = app.data
-    if (!decimals && hasDecimalGrades(data)) {
-      box.checked = true
-      return alert.show('Hay notas con decimales. Cámbialas por números enteros antes de desactivar esta opción.')
-    }
-    alert.hide()
-    const [, basico, alto, superior] = data.settings.levels.map((l) => l.min)
-    app.commit({ ...data, settings: { ...data.settings, decimals, levels: levelsFromMins({ basico, alto, superior }, decimals) } })
-  })
-  return block('Decimales', h('label', { class: 'check section-gap' }, box, 'Permitir notas con un decimal (por ejemplo 85,5)'), h('div', { class: 'section-gap' }, alert.el))
 }
 
 function backupBlock(app) {

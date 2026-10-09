@@ -7,7 +7,6 @@ import {
   addSubject,
   completion,
   gradeOf,
-  hasDecimalGrades,
   moveSubject,
   removeGroup,
   removeStudent,
@@ -152,10 +151,5 @@ describe('grades', () => {
     data = setGrade(data, 's2', 'len', 1, 70)
     data = setGrade(data, 's2', 'len', 2, 70)
     expect(completion(data, 'g6a', 1)).toEqual({ filled: 2, total: 4 })
-  })
-
-  it('knows when any grade has decimals', () => {
-    expect(hasDecimalGrades(setGrade(sample(), 's1', 'mat', 1, 88))).toBe(false)
-    expect(hasDecimalGrades(setGrade(sample(), 's1', 'mat', 1, 88.5))).toBe(true)
   })
 })

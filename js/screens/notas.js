@@ -108,7 +108,7 @@ export function notasView(app) {
       const input = h('input', {
         class: value != null && value < lowLimit ? 'cell low' : 'cell',
         type: 'text',
-        inputmode: data.settings.decimals ? 'decimal' : 'numeric',
+        inputmode: 'decimal',
         autocomplete: 'off',
         value: formatGrade(value),
         'aria-label': `${subject.name}, ${student.apellidos} ${student.nombres}`,
@@ -118,7 +118,7 @@ export function notasView(app) {
       })
       if (value == null) autofocusSet = true
       input.addEventListener('input', () => {
-        const result = parseGrade(input.value, { decimals: app.data.settings.decimals })
+        const result = parseGrade(input.value)
         if (result.error) {
           input.setAttribute('aria-invalid', 'true')
           input.title = result.error
@@ -173,7 +173,7 @@ export function notasView(app) {
     h(
       'div',
       { class: 'sheet-notes' },
-      h('p', {}, `En rojo: desempeño Bajo (menos de ${lowLimit}).`),
+      h('p', {}, `En rojo: desempeño Bajo (menos de ${formatGrade(lowLimit)}).`),
       h('p', {}, `${plural(students.length, 'estudiante', 'estudiantes')}, ${plural(subjects.length, 'asignatura', 'asignaturas')}. Enter baja a la siguiente fila.`),
     ),
   )

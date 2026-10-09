@@ -148,6 +148,3 @@ export function completion(data, groupId, period) {
   for (const s of students) for (const subjectId of group.subjectIds) if (gradeOf(data, s.id, subjectId, period) != null) filled++
   return { filled, total: students.length * group.subjectIds.length }
 }
-
-export const hasDecimalGrades = (data) =>
-  Object.values(data.grades).some((bySubject) => Object.values(bySubject).some((periods) => periods.some((v) => v != null && !Number.isInteger(v))))
