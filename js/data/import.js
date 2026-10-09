@@ -19,8 +19,9 @@ const key = (text) =>
 
 // ---------- Header row ----------
 
-// Columns that are neither the student nor a subject.
-const NOT_SUBJECTS = new Set(['n', 'no', 'nro', 'num', 'numero', 'item', 'promedio', 'prom', 'total', 'definitiva', 'nota definitiva', 'desempeno', 'observaciones', 'observacion', 'documento', 'doc', 'identificacion', 'ti', 'puesto', 'fallas', 'inasistencias', 'jornada', 'sede', 'ano', 'periodo'])
+// Columns that are neither the student nor a subject (headers compared without accents or signs).
+const NOT_SUBJECTS = new Set(['n', 'no', 'nro', 'num', 'numero', 'item', 'prom', 'total', 'definitiva', 'nota definitiva', 'doc', 'puesto', 'fallas', 'inasistencias', 'jornada', 'sede', 'ano', 'periodo'])
+const isNotSubject = (k) => NOT_SUBJECTS.has(k) || /promedio|desempeno|observacion|documento|identidad|identificacion/.test(k)
 
 const isNameHeader = (k) => k.includes('nombre') || ['estudiante', 'estudiantes', 'alumno', 'alumnos'].includes(k)
 
@@ -40,7 +41,7 @@ function findHeader(rows) {
     rows[i].forEach((text, col) => {
       if ([nombre, apellidos, grado, curso].includes(col)) return
       const name = cleanName(String(text ?? ''))
-      if (name && !NOT_SUBJECTS.has(keys[col].replace(/[^a-z ]/g, '').trim())) subjects.push({ col, name })
+      if (name && !isNotSubject(keys[col].replace(/[^a-z ]/g, '').trim())) subjects.push({ col, name })
     })
     return { row: i, nombre, apellidos, grado, curso, subjects }
   }
@@ -52,7 +53,7 @@ function findHeader(rows) {
 const WORDS = { primero: 1, primer: 1, segundo: 2, tercero: 3, tercer: 3, cuarto: 4, quinto: 5, sexto: 6, septimo: 7, setimo: 7, octavo: 8, noveno: 9, decimo: 10, undecimo: 11, once: 11 }
 
 /** "1", "1°", "Primero", "Transición" → the app's grade level; null when unknown. */
-export function readGrado(text) {
+function readGrado(text) {
   const k = key(text).replace(/grado|[°º.]/g, '').replace(/\s/g, '')
   if (['transicion', '0', 'preescolar'].includes(k)) return GRADE_LEVELS[0]
   const n = /^\d+$/.test(k) ? Number(k) : WORDS[k]
@@ -60,7 +61,7 @@ export function readGrado(text) {
 }
 
 /** A number is written with two digits ("1" → "01"), as on the boletín; letters in capitals. */
-export const readCurso = (text) => {
+const readCurso = (text) => {
   const clean = cleanName(String(text ?? '')).toUpperCase()
   return /^\d+$/.test(clean) ? String(Number(clean)).padStart(2, '0') : clean
 }

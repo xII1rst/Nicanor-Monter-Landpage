@@ -20,13 +20,13 @@ describe('readImport: the header row', () => {
       sheet([
         ['Notas del primer periodo'],
         [],
-        ['N°', 'NOMBRE COMPLETO', 'Grado', 'Curso', 'Matemáticas', 'Inglés', 'Promedio', 'Desempeño', 'Documento'],
-        ['1', 'ROJAS MEJÍA SARA', '1°', '01', '8,4', '8', '8,2', 'Alto', '1065'],
+        ['N°', 'NOMBRE COMPLETO', 'Grado', 'Curso', 'Matemáticas', 'T.I.', 'Promedio', 'Desempeño', 'Doc. Identidad', 'Observaciones'],
+        ['1', 'ROJAS MEJÍA SARA', '1°', '01', '8,4', '8', '8,2', 'Alto', '1065', 'Bien'],
       ]),
     ])
     expect(preview.subjects).toEqual([
       { name: 'Matemáticas', isNew: true },
-      { name: 'Inglés', isNew: true },
+      { name: 'T.I.', isNew: true },
     ])
     expect(preview.notes).toBe(2)
   })
