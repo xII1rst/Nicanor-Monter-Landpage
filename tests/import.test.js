@@ -50,7 +50,7 @@ describe('applyImport: a first table', () => {
 
   it('creates the groups, students and subjects', () => {
     const data = run(newDataFile(2026), rows)
-    expect(names(data)).toEqual(['1°01: ROJAS MEJÍA SARA, PÉREZ DÍAZ LUIS', '2°A: ÑAÑEZ PAZ EVA'])
+    expect(names(data)).toEqual(['1°01: PÉREZ DÍAZ LUIS, ROJAS MEJÍA SARA', '2°A: ÑAÑEZ PAZ EVA'])
     expect(data.subjects.map((s) => s.name)).toEqual(['Matemáticas', 'Lengua Castellana'])
   })
 

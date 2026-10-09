@@ -81,7 +81,7 @@ describe('students', () => {
   })
 
   it('keeps one name per student, trimmed and with single spaces', () => {
-    const data = addStudent(sample(), 'g6a', { nombre: '  ROJAS   CASTRO  SARA ' }, 's9')
+    const data = addStudent(sample(), 'g6a', { nombre: '  ROJAS   MEJÍA  SARA ' }, 's9')
     expect(data.students.at(-1)).toEqual({ id: 's9', groupId: 'g6a', nombre: 'ROJAS MEJÍA SARA' })
     expect(() => addStudent(sample(), 'g6a', { nombre: ' ' })).toThrow('Escribe el nombre del estudiante.')
   })
