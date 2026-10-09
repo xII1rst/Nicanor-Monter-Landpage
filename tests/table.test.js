@@ -1,5 +1,5 @@
 import { describe, expect, it } from './runner.js'
-import { decodeText, detectSeparator, parseDelimited, readTextTable } from '../js/data/table.js'
+import { decodeText, detectSeparator, parseDelimited } from '../js/data/table.js'
 
 const utf8 = (text) => new TextEncoder().encode(text)
 
@@ -58,15 +58,5 @@ describe('detectSeparator', () => {
 
   it('looks at the header row, not at a title above it', () => {
     expect(detectSeparator('Notas, periodo 3, sede central\nNombre;Grado;Curso\n')).toBe(';')
-  })
-})
-
-describe('readTextTable', () => {
-  it('turns the bytes of a .csv or .txt into rows', () => {
-    const bytes = utf8('﻿Nombre;Grado;Curso;Matemáticas\r\nROJAS MEJÍA SARA;1°;01;8,4\r\n')
-    expect(readTextTable(bytes)).toEqual([
-      ['Nombre', 'Grado', 'Curso', 'Matemáticas'],
-      ['ROJAS MEJÍA SARA', '1°', '01', '8,4'],
-    ])
   })
 })

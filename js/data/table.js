@@ -59,8 +59,3 @@ export function detectSeparator(text) {
   if (count('\t') > 0) return '\t'
   return count(';') >= count(',') && count(';') > 0 ? ';' : ','
 }
-
-export function readTextTable(bytes) {
-  const text = decodeText(bytes)
-  return parseDelimited(text, detectSeparator(text))
-}

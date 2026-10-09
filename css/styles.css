@@ -1038,6 +1038,63 @@ button:disabled {
 .section-gap {
   margin-top: 1rem;
 }
+.empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+.import-alert .alert {
+  margin-bottom: 1rem;
+}
+
+/* ---------- Import: what a table would add ---------- */
+
+.summary {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.5rem 1.25rem;
+  padding: 1rem 1.125rem;
+  border: 1px solid var(--raya);
+  border-radius: 0.75rem;
+  background: var(--hoja);
+  font-size: 0.9375rem;
+}
+.summary dt {
+  font-weight: 600;
+}
+.summary dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+.summary-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.375rem;
+}
+.meta {
+  color: var(--grafito);
+}
+.tag {
+  padding: 0 0.375rem;
+  border-radius: 0.25rem;
+  background: var(--sello-tenue);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--sello);
+}
+.problems {
+  margin-top: 0.5rem;
+  padding-left: 1.125rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--rojo);
+  list-style: disc;
+}
+.problems .meta {
+  color: var(--grafito);
+}
 
 /* ---------- Settings ---------- */
 

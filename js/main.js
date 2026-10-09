@@ -1,10 +1,13 @@
 // Entry point: decides which screen to show and moves between them.
 import { hashSecret, verifySecret } from './data/auth.js'
-import { createDataFile, ensureAccess, fileAccessSupported, pickDataFile, readDataFile, rememberedFile, writeDataFile } from './data/file.js'
+import { createDataFile, ensureAccess, fileAccessSupported, openFile, readDataFile, rememberFile, rememberedFile, writeDataFile } from './data/file.js'
+import { applyImport, readImport } from './data/import.js'
 import { createSaver } from './data/saver.js'
 import { newDataFile } from './data/store.js'
 import { startIdleLock, stopIdleLock } from './idle.js'
 import { forgotScreen } from './screens/forgot.js'
+import { frame, stepTitle } from './screens/frame.js'
+import { importPanel } from './screens/importar.js'
 import { gateScreen } from './screens/gate.js'
 import { setupScreen } from './screens/setup.js'
 import { ajustesView } from './screens/ajustes.js'
@@ -14,7 +17,8 @@ import { notasView } from './screens/notas.js'
 import { saveStatusEl, shellScreen } from './screens/shell.js'
 import { startScreen } from './screens/start.js'
 import { unsupportedScreen } from './screens/unsupported.js'
-import { mount } from './ui/dom.js'
+import { h, mount } from './ui/dom.js'
+import { setPref } from './ui/prefs.js'
 
 // Offline support only on the published site. While reviewing locally (Five Server),
 // every save should show up right away instead of a cached copy.
@@ -54,6 +58,30 @@ const app = {
   },
   lock: () => lock(),
   retrySave: () => session.saver.retry(),
+  /** Asks for a table and shows what it would add to the open file. */
+  async importTable() {
+    const opened = await openFile()
+    if (opened.kind !== 'table') throw new Error('Ese es un archivo de Notas NMA, no una tabla. Elige un .xlsx, .csv o .txt con las columnas Nombre, Grado y Curso.')
+    const preview = readImport(session.data, opened.sheets)
+    const content = h(
+      'div',
+      { class: 'settings' },
+      h('h1', { class: 'page-title' }, 'Importar tabla'),
+      importPanel({
+        data: session.data,
+        fileName: opened.name,
+        preview,
+        confirmLabel: 'Importar',
+        onConfirm: async (period) => {
+          app.commit(applyImport(session.data, preview, period))
+          if (period) setPref('period', period)
+          app.go('notas')
+        },
+        onCancel: () => app.go('notas'),
+      }),
+    )
+    mount(shellScreen({ app, view: 'notas', content, saveStatus }))
+  },
 }
 
 function showSaveStatus(status) {
@@ -106,9 +134,35 @@ function showStart() {
 }
 
 async function openOther() {
-  const { handle, data } = await pickDataFile()
-  if (data.auth) showLogin(handle)
-  else showSetup(handle, data)
+  const opened = await openFile()
+  if (opened.kind === 'table') return showImportStart(opened)
+  await rememberFile(opened.handle)
+  if (opened.data.auth) showLogin(opened.handle)
+  else showSetup(opened.handle, opened.data)
+}
+
+// A table opened before there is a data file: the import becomes a new data file.
+function showImportStart({ name, sheets }) {
+  const empty = newDataFile(new Date().getFullYear())
+  const preview = readImport(empty, sheets)
+  mount(
+    frame(
+      stepTitle('Importar tabla'),
+      importPanel({
+        data: empty,
+        fileName: name,
+        preview,
+        confirmLabel: 'Crear archivo de notas',
+        onConfirm: async (period) => {
+          const data = applyImport(empty, preview, period)
+          const handle = await createDataFile(data)
+          if (period) setPref('period', period)
+          showSetup(handle, data)
+        },
+        onCancel: () => boot(),
+      }),
+    ),
+  )
 }
 
 function showLogin(handle) {

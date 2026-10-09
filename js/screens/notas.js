@@ -1,6 +1,6 @@
 import { average, formatGrade, parseGrade } from '../data/grades.js'
 import { completion, gradeOf, groupSubjects, setGrade, sortedGroups, studentsOf } from '../data/model.js'
-import { alertBox, button } from '../ui/controls.js'
+import { alertBox, button, run } from '../ui/controls.js'
 import { h } from '../ui/dom.js'
 import { pref, setPref } from '../ui/prefs.js'
 
@@ -14,9 +14,20 @@ export function notasView(app) {
   const data = app.data
   const groups = sortedGroups(data)
   const title = h('h1', { class: 'page-title' }, 'Notas')
+  const importAlert = alertBox()
+  const importButton = (variant) => {
+    const btn = button('Importar tabla', { variant, small: variant === 'secondary', onclick: () => run(btn, importAlert, app.importTable) })
+    return btn
+  }
 
   if (groups.length === 0) {
-    return h('div', {}, h('div', { class: 'page-head' }, title), empty('Todavía no hay grupos. Crea los grupos con sus estudiantes y asignaturas para empezar.', 'Ir a Grupos', () => app.go('grupos')))
+    return h(
+      'div',
+      {},
+      h('div', { class: 'page-head' }, title),
+      empty('Todavía no hay grupos. Importa una tabla de Excel con Nombre, Grado, Curso y las notas, o crea los grupos a mano.', 'Ir a Grupos', () => app.go('grupos'), importButton('secondary')),
+      h('div', { class: 'section-gap' }, importAlert.el),
+    )
   }
 
   const group = groups.find((g) => g.id === pref('groupId')) ?? groups[0]
@@ -59,12 +70,13 @@ export function notasView(app) {
       h('div', {}, h('label', { class: 'control-label', for: 'notas-grupo' }, 'Grupo'), groupSelect),
       h('div', {}, h('span', { class: 'control-label', id: 'notas-periodo' }, 'Periodo'), periodButtons),
       count,
+      importButton('secondary'),
     ),
   )
 
   if (students.length === 0 || subjects.length === 0) {
     const missing = students.length === 0 && subjects.length === 0 ? 'estudiantes ni asignaturas' : students.length === 0 ? 'estudiantes' : 'asignaturas'
-    return h('div', {}, head, empty(`${group.name} todavía no tiene ${missing}.`, `Completar ${group.name}`, () => {
+    return h('div', {}, head, importAlert.el, empty(`${group.name} todavía no tiene ${missing}.`, `Completar ${group.name}`, () => {
       setPref('groupId', group.id)
       app.go('grupos')
     }))
@@ -168,6 +180,7 @@ export function notasView(app) {
     'div',
     {},
     head,
+    h('div', { class: 'import-alert' }, importAlert.el),
     h('div', { class: 'sheet-wrap' }, table),
     h('div', { class: 'sheet-error' }, problems.el),
     h(
@@ -198,6 +211,6 @@ function moveWithKeys(event, table, rowCount, colCount) {
   table.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`)?.focus()
 }
 
-function empty(message, actionLabel, action) {
-  return h('div', { class: 'empty' }, h('p', {}, message), button(actionLabel, { onclick: action }))
+function empty(message, actionLabel, action, extra) {
+  return h('div', { class: 'empty' }, h('p', {}, message), h('div', { class: 'empty-actions' }, button(actionLabel, { onclick: action }), extra))
 }
