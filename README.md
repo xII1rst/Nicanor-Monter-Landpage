@@ -11,6 +11,20 @@ Saving to a file on the PC only works in those two browsers.
 Opening the file directly (double-click, `file://`) does not work: the browser blocks
 JavaScript modules and file access there. It needs a local server, which is what Five Server is.
 
+## Starting from a table
+
+**Abrir archivo existente** (and **Importar tabla** on Notas) take any `.xlsx`, `.csv` or `.txt`
+with a header row of **Nombre**, **Grado** and **Curso**, and one column per subject holding the notas
+of one period (the app asks which). Example:
+
+```
+Nombre                 | Grado | Curso | Matemáticas | Lengua Castellana
+ROJAS MEJÍA SARA  | 1°    | 01    | 8,4         | 6,9
+```
+
+Students already in the file are matched by name (case, accents and spaces don't matter),
+so importing period 1, 2 and 3 tables one after another fills the same students.
+
 ## Tests
 
 With Five Server running, open `/tests/` (e.g. `http://127.0.0.1:5500/tests/`).
@@ -39,7 +53,8 @@ css/styles.css        all styles
 js/main.js            decides which screen to show
 js/screens/           one file per screen
 js/ui/                small building blocks (fields, buttons, escudo)
-js/data/              data file format, file access, password hashing
+js/data/              data file format, file access, password hashing,
+                      reading tables (table.js, xlsx.js) and importing them (import.js)
 sw.js                 offline support
 tests/                in-browser tests
 fonts/, icons/, brand/
