@@ -51,13 +51,19 @@ function findHeader(rows) {
 // ---------- Cells ----------
 
 const WORDS = { primero: 1, primer: 1, segundo: 2, tercero: 3, tercer: 3, cuarto: 4, quinto: 5, sexto: 6, septimo: 7, setimo: 7, octavo: 8, noveno: 9, decimo: 10, undecimo: 11, once: 11 }
+const ROMAN = { iii: 3, iv: 4, v: 5, vi: 6 }
 
-/** "1", "1°", "Primero", "Transición" → the app's grade level; null when unknown. */
+/** "1", "1°", "Primero", "Transición", "CLEI 3", "Clei III" → { grade } of the app, or { error }. */
 function readGrado(text) {
   const k = key(text).replace(/grado|[°º.]/g, '').replace(/\s/g, '')
-  if (['transicion', '0', 'preescolar'].includes(k)) return GRADE_LEVELS[0]
+  if (['transicion', '0', 'preescolar'].includes(k)) return { grade: GRADE_LEVELS[0] }
+  const clei = k.match(/^clei(\d+|iii|iv|v|vi)$/)
+  const ciclo = clei && (ROMAN[clei[1]] ?? Number(clei[1]))
+  if (ciclo >= 3 && ciclo <= 6) return { grade: `CLEI ${ciclo}` }
   const n = /^\d+$/.test(k) ? Number(k) : WORDS[k]
-  return n >= 1 && n <= 11 ? GRADE_LEVELS[n] : null
+  if (n >= 1 && n <= 5) return { grade: GRADE_LEVELS[n] }
+  if (n >= 6 && n <= 11) return { error: `Grado "${text}": la secundaria va en CLEI 3 a 6.` }
+  return { error: `Grado "${text}" no reconocido.` }
 }
 
 /** A number is written with two digits ("1" → "01"), as on the boletín; letters in capitals. */
@@ -112,11 +118,12 @@ export function readImport(data, sheets) {
       const surname = header.apellidos >= 0 ? `${row[header.apellidos] ?? ''} ` : ''
       const nombre = cleanName(surname + String(row[header.nombre] ?? ''))
       const gradoText = cleanName(String(row[header.grado] ?? ''))
-      const grade = readGrado(gradoText)
+      const grado = gradoText ? readGrado(gradoText) : {}
+      const grade = grado.grade
       const section = readCurso(row[header.curso])
       if (!nombre) problem('Falta el nombre.')
       else if (!gradoText) problem('Falta el grado.')
-      else if (!grade) problem(`Grado "${gradoText}" no reconocido.`)
+      else if (grado.error) problem(grado.error)
       else if (!section) problem('Falta el curso.')
       if (!nombre || !grade || !section) continue
 

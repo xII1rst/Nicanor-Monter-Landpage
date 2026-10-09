@@ -1,12 +1,15 @@
 import { describe, expect, it } from './runner.js'
 import { newDataFile } from '../js/data/store.js'
 import {
+  GRADE_LEVELS,
   addGroup,
   addStudent,
   addStudents,
   addSubject,
   completion,
+  gradeInWords,
   gradeOf,
+  jornadaOf,
   moveSubject,
   removeGroup,
   removeStudent,
@@ -21,7 +24,7 @@ import {
 
 function sample() {
   let data = newDataFile(2026)
-  data = addGroup(data, { grade: '6°', section: 'A' }, 'g6a')
+  data = addGroup(data, { grade: '1°', section: 'A' }, 'g6a')
   data = addSubject(data, { name: 'Matemáticas', area: 'Matemáticas' }, 'mat')
   data = addSubject(data, { name: 'Lengua Castellana', area: 'Humanidades' }, 'len')
   data = setGroupSubjects(data, 'g6a', ['mat', 'len'])
@@ -31,27 +34,40 @@ function sample() {
 }
 
 describe('groups', () => {
-  it('names a group from its grade and section', () => {
-    const data = addGroup(newDataFile(2026), { grade: '6°', section: 'a' }, 'x')
-    expect(data.groups[0].name).toBe('6°A')
-    expect(addGroup(newDataFile(2026), { grade: 'Transición', section: 'B' }, 'x').groups[0].name).toBe('Transición B')
+  it('names a group from its grade and curso', () => {
+    const data = addGroup(newDataFile(2026), { grade: '1°', section: 'a' }, 'x')
+    expect(data.groups[0].name).toBe('1°A')
+    expect(addGroup(newDataFile(2026), { grade: 'Transición', section: '01' }, 'x').groups[0].name).toBe('Transición 01')
+    expect(addGroup(newDataFile(2026), { grade: 'CLEI 3', section: '01' }, 'x').groups[0].name).toBe('CLEI 3 01')
+  })
+
+  it('has Transición to 5° and the CLEI 3 to 6 of the sabatina, no 6° to 11°', () => {
+    expect(GRADE_LEVELS).toEqual(['Transición', '1°', '2°', '3°', '4°', '5°', 'CLEI 3', 'CLEI 4', 'CLEI 5', 'CLEI 6'])
+  })
+
+  it('takes the jornada from the grade: Única up to 5°, Sabatina for CLEI', () => {
+    expect(['Transición', '1°', '5°', 'CLEI 3', 'CLEI 6'].map(jornadaOf)).toEqual(['Única', 'Única', 'Única', 'Sabatina', 'Sabatina'])
+  })
+
+  it('writes the grade in words, as the boletín prints it', () => {
+    expect(['Transición', '1°', '2°', '3°', '4°', '5°', 'CLEI 4'].map(gradeInWords)).toEqual(['Transición', 'Primero', 'Segundo', 'Tercero', 'Cuarto', 'Quinto', 'CLEI 4'])
   })
 
   it('refuses two groups with the same name', () => {
-    expect(() => addGroup(sample(), { grade: '6°', section: 'A' })).toThrow('Ya existe el grupo 6°A.')
+    expect(() => addGroup(sample(), { grade: '1°', section: 'A' })).toThrow('Ya existe el grupo 1°A.')
   })
 
   it('lists groups by grade, then section', () => {
     let data = newDataFile(2026)
-    data = addGroup(data, { grade: '10°', section: 'A' }, 'a')
-    data = addGroup(data, { grade: '6°', section: 'B' }, 'b')
-    data = addGroup(data, { grade: '6°', section: 'A' }, 'c')
+    data = addGroup(data, { grade: 'CLEI 4', section: 'A' }, 'a')
+    data = addGroup(data, { grade: '1°', section: 'B' }, 'b')
+    data = addGroup(data, { grade: '1°', section: 'A' }, 'c')
     data = addGroup(data, { grade: 'Transición', section: '' }, 'd')
-    expect(sortedGroups(data).map((g) => g.name)).toEqual(['Transición', '6°A', '6°B', '10°A'])
+    expect(sortedGroups(data).map((g) => g.name)).toEqual(['Transición', '1°A', '1°B', 'CLEI 4 A'])
   })
 
   it('renames a group', () => {
-    expect(updateGroup(sample(), 'g6a', { grade: '7°', section: 'A' }).groups[0].name).toBe('7°A')
+    expect(updateGroup(sample(), 'g6a', { grade: '2°', section: 'A' }).groups[0].name).toBe('2°A')
   })
 
   it('will not delete a group that still has students', () => {
@@ -59,7 +75,7 @@ describe('groups', () => {
   })
 
   it('deletes an empty group', () => {
-    const data = addGroup(newDataFile(2026), { grade: '6°', section: 'A' }, 'x')
+    const data = addGroup(newDataFile(2026), { grade: '1°', section: 'A' }, 'x')
     expect(removeGroup(data, 'x').groups).toEqual([])
   })
 
@@ -100,7 +116,7 @@ describe('students', () => {
   })
 
   it('moves a student to another group by editing it', () => {
-    let data = addGroup(sample(), { grade: '6°', section: 'B' }, 'g6b')
+    let data = addGroup(sample(), { grade: '1°', section: 'B' }, 'g6b')
     data = updateStudent(data, 's1', { groupId: 'g6b' })
     expect(studentsOf(data, 'g6b').map((s) => s.id)).toEqual(['s1'])
   })

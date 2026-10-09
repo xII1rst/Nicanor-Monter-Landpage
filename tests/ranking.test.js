@@ -3,10 +3,10 @@ import { newDataFile } from '../js/data/store.js'
 import { addGroup, addStudent, addSubject, setGrade, setGroupSubjects } from '../js/data/model.js'
 import { missingGrades, rankGroup } from '../js/data/ranking.js'
 
-// 6°A with two subjects and four students; grades[student] = [mat, len] for period 1.
+// 1°A with two subjects and four students; grades[student] = [mat, len] for period 1.
 function group(grades, period = 1) {
   let data = newDataFile(2026)
-  data = addGroup(data, { grade: '6°', section: 'A' }, 'g')
+  data = addGroup(data, { grade: '1°', section: 'A' }, 'g')
   data = addSubject(data, { name: 'Matemáticas' }, 'mat')
   data = addSubject(data, { name: 'Lengua' }, 'len')
   data = setGroupSubjects(data, 'g', ['mat', 'len'])

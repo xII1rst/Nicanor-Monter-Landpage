@@ -80,17 +80,23 @@ describe('applyImport: a first table', () => {
 })
 
 describe('readImport: grado and curso', () => {
-  it('understands the grado written as a number, with °, or in words', () => {
+  it('understands the grado written as a number, with °, in words, or as a CLEI', () => {
     const data = run(newDataFile(2026), [
       ['Nombre', 'Grado', 'Curso'],
       ['A Uno', 'Transición', '01'],
       ['B Dos', 'primero', '01'],
       ['C Tres', '3º', '01'],
-      ['D Cuatro', 'Décimo', '01'],
-      ['E Cinco', 'UNDÉCIMO', '01'],
-      ['F Seis', '7', '01'],
+      ['D Cuatro', 'Quinto', '01'],
+      ['E Cinco', 'clei iii', '01'],
+      ['F Seis', 'CLEI 6', '01'],
+      ['G Siete', 'Clei IV', '01'],
     ])
-    expect(sortedGroups(data).map((g) => g.name)).toEqual(['Transición 01', '1°01', '3°01', '7°01', '10°01', '11°01'])
+    expect(sortedGroups(data).map((g) => g.name)).toEqual(['Transición 01', '1°01', '3°01', '5°01', 'CLEI 3 01', 'CLEI 4 01', 'CLEI 6 01'])
+  })
+
+  it('points 6° to 11° to the CLEI of the sabatina', () => {
+    const preview = readImport(newDataFile(2026), [sheet([['Nombre', 'Grado', 'Curso'], ['A Uno', '10', '01'], ['B Dos', 'Sexto', '01']], 'Hoja1')])
+    expect(preview.problems.map((p) => p.message)).toEqual(['Grado "10": la secundaria va en CLEI 3 a 6.', 'Grado "Sexto": la secundaria va en CLEI 3 a 6.'])
   })
 
   it('writes a numeric curso with two digits, as the boletín does (Excel drops the zero)', () => {
@@ -187,14 +193,14 @@ describe('readImport: subjects per group', () => {
     const rows = [
       ['Nombre', 'Grado', 'Curso', 'Matemáticas', 'Física', 'Ética'],
       ['A Uno', '1', '01', '8', '', ''],
-      ['B Dos', '10', '01', '7', '9', ''],
+      ['B Dos', 'CLEI 5', '01', '7', '9', ''],
     ]
     const preview = readImport(newDataFile(2026), [sheet(rows)])
     expect(preview.emptyColumns).toEqual(['Ética'])
     const data = applyImport(newDataFile(2026), preview, 1)
     const subjectsOf = (name) => data.groups.find((g) => g.name === name).subjectIds.map((id) => data.subjects.find((s) => s.id === id).name)
     expect(subjectsOf('1°01')).toEqual(['Matemáticas'])
-    expect(subjectsOf('10°01')).toEqual(['Matemáticas', 'Física'])
+    expect(subjectsOf('CLEI 5 01')).toEqual(['Matemáticas', 'Física'])
     expect(data.subjects.map((s) => s.name)).toEqual(['Matemáticas', 'Física'])
   })
 

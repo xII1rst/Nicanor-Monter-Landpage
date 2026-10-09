@@ -2,7 +2,15 @@
 // Every function returns a new data object and never changes the one it gets,
 // so the app can save exactly what it shows.
 
-export const GRADE_LEVELS = ['Transición', '1°', '2°', '3°', '4°', '5°', '6°', '7°', '8°', '9°', '10°', '11°']
+// Transición to 5° study in the Jornada Única; secondary school is the Saturday program
+// in ciclos (CLEI 3 to 6), so there are no 6° to 11° groups.
+export const GRADE_LEVELS = ['Transición', '1°', '2°', '3°', '4°', '5°', 'CLEI 3', 'CLEI 4', 'CLEI 5', 'CLEI 6']
+const IN_WORDS = ['Transición', 'Primero', 'Segundo', 'Tercero', 'Cuarto', 'Quinto']
+
+export const jornadaOf = (grade) => (grade.startsWith('CLEI') ? 'Sabatina' : 'Única')
+
+/** As the boletín prints it: "Primero", "CLEI 3". */
+export const gradeInWords = (grade) => IN_WORDS[GRADE_LEVELS.indexOf(grade)] ?? grade
 
 const collator = new Intl.Collator('es', { sensitivity: 'base' })
 export const newId = () => crypto.randomUUID().slice(0, 8)
@@ -10,7 +18,7 @@ const same = (a, b) => collator.compare(a, b) === 0
 
 // ---------- Groups ----------
 
-export const groupName = (grade, section) => (grade === 'Transición' ? `Transición ${section}`.trim() : `${grade}${section}`)
+export const groupName = (grade, section) => (grade.endsWith('°') ? `${grade}${section}` : `${grade} ${section}`.trim())
 
 function groupFields(data, { grade, section }, exceptId) {
   const cleanSection = section.trim().toUpperCase()

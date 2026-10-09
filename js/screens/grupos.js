@@ -57,11 +57,11 @@ export function gruposView(app) {
     'div',
     { class: 'split' },
     h('div', {}, h('h1', { class: 'page-title' }, 'Grupos'), groups.length > 0 && list, newGroupForm(app, groups.length === 0)),
-    selected ? groupDetail(app, selected) : h('div', { class: 'empty' }, h('p', {}, 'Crea el primer grupo: elige el grado y escribe la sección (A, B…).')),
+    selected ? groupDetail(app, selected) : h('div', { class: 'empty' }, h('p', {}, 'Crea el primer grupo: elige el grado y escribe el curso (01, 02…).')),
   )
 }
 
-function gradeSelect(id, value = '6°') {
+function gradeSelect(id, value = '1°') {
   const select = h('select', { class: 'select', id }, GRADE_LEVELS.map((g) => h('option', { value: g }, g)))
   select.value = value
   return select
@@ -81,7 +81,7 @@ function newGroupForm(app, first) {
       'div',
       { class: 'inline-fields section-gap' },
       h('div', {}, h('label', { class: 'control-label', for: gradeId }, 'Grado'), grade),
-      h('div', {}, h('label', { class: 'control-label', for: sectionId }, 'Sección'), section),
+      h('div', {}, h('label', { class: 'control-label', for: sectionId }, 'Curso'), section),
       button('Crear', { type: 'submit' }),
     ),
     h('div', { class: 'section-gap' }, alert.el),
@@ -148,7 +148,7 @@ function groupEditForm(app, group, alert) {
   const grade = gradeSelect(uid('grade'), group.gradeLevel)
   grade.dataset.focusKey = 'group-grade'
   grade.setAttribute('aria-label', 'Grado')
-  const section = h('input', { class: 'input input-narrow', value: group.section ?? '', maxlength: 3, 'aria-label': 'Sección' })
+  const section = h('input', { class: 'input input-narrow', value: group.section ?? '', maxlength: 3, 'aria-label': 'Curso' })
   const form = h(
     'form',
     { class: 'block-head', novalidate: true },
