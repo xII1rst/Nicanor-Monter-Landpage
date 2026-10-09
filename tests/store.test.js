@@ -9,6 +9,8 @@ describe('newDataFile', () => {
     expect(data.groups).toEqual([])
     expect(data.students).toEqual([])
     expect(data.grades).toEqual({})
+    expect(data.objectives).toEqual({})
+    expect(data.notes).toEqual({})
   })
 
   it('locks after 15 idle minutes by default', () => {

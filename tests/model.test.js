@@ -7,15 +7,21 @@ import {
   addStudents,
   addSubject,
   completion,
+  copyObjectives,
   gradeInWords,
   gradeOf,
   jornadaOf,
   moveSubject,
+  noteOf,
+  objectiveOf,
+  objectivesReplaced,
   removeGroup,
   removeStudent,
   removeSubject,
   setGrade,
   setGroupSubjects,
+  setNote,
+  setObjective,
   sortedGroups,
   studentsOf,
   updateGroup,
@@ -172,5 +178,67 @@ describe('grades', () => {
     data = setGrade(data, 's2', 'len', 1, 70)
     data = setGrade(data, 's2', 'len', 2, 70)
     expect(completion(data, 'g6a', 1)).toEqual({ filled: 2, total: 4 })
+  })
+})
+
+describe('objetivos', () => {
+  it('keeps the objetivos of each group, subject and period', () => {
+    const data = setObjective(sample(), 'g6a', 'mat', 3, 'Suma\nResta')
+    expect(objectiveOf(data, 'g6a', 'mat', 3)).toBe('Suma\nResta')
+    expect(objectiveOf(data, 'g6a', 'mat', 1)).toBe('')
+    expect(objectiveOf(data, 'g6a', 'len', 3)).toBe('')
+  })
+
+  it('reads files from before objetivos existed', () => {
+    const { objectives: _gone, ...old } = sample()
+    expect(objectiveOf(old, 'g6a', 'mat', 1)).toBe('')
+    expect(objectiveOf(setObjective(old, 'g6a', 'mat', 1, 'Suma'), 'g6a', 'mat', 1)).toBe('Suma')
+  })
+
+  it('copies another group’s objetivos for the subjects both have, leaving out empty ones', () => {
+    let data = addGroup(sample(), { grade: '1°', section: 'B' }, 'g6b')
+    data = addSubject(data, { name: 'Inglés' }, 'ing')
+    data = setGroupSubjects(data, 'g6b', ['mat', 'len', 'ing'])
+    data = setObjective(data, 'g6a', 'mat', 2, 'Suma')
+    data = setObjective(data, 'g6b', 'len', 2, 'Lee cuentos')
+    data = setObjective(data, 'g6b', 'ing', 2, 'Colores')
+    const copied = copyObjectives(data, 'g6a', 'g6b', 2)
+    expect(objectiveOf(copied, 'g6b', 'mat', 2)).toBe('Suma')
+    expect(objectiveOf(copied, 'g6b', 'len', 2)).toBe('Lee cuentos') // nothing to copy there
+    expect(objectiveOf(copied, 'g6b', 'ing', 2)).toBe('Colores') // 1°A doesn't have Inglés
+  })
+
+  it('counts the typed objetivos a copy would replace', () => {
+    let data = addGroup(sample(), { grade: '1°', section: 'B' }, 'g6b')
+    data = setGroupSubjects(data, 'g6b', ['mat', 'len'])
+    data = setObjective(data, 'g6a', 'mat', 1, 'Suma')
+    data = setObjective(data, 'g6a', 'len', 1, 'Lee')
+    data = setObjective(data, 'g6b', 'mat', 1, 'Resta')
+    data = setObjective(data, 'g6b', 'len', 1, 'Lee')
+    expect(objectivesReplaced(data, 'g6a', 'g6b', 1)).toBe(1)
+  })
+
+  it('go away with their subject or group', () => {
+    let data = setObjective(sample(), 'g6a', 'mat', 1, 'Suma')
+    data = setObjective(data, 'g6a', 'len', 1, 'Lee')
+    expect(removeSubject(data, 'mat').objectives.g6a).toEqual({ len: ['Lee', '', '', ''] })
+    let empty = setObjective(addGroup(newDataFile(2026), { grade: '2°', section: 'A' }, 'x'), 'x', 'mat', 1, 'Suma')
+    expect(removeGroup(empty, 'x').objectives.x).toBeUndefined()
+  })
+})
+
+describe('comportamiento and observaciones', () => {
+  it('keeps both texts per student and period', () => {
+    let data = setNote(sample(), 's1', 'comportamiento', 3, 'Buena convivencia')
+    data = setNote(data, 's1', 'observaciones', 3, 'Mejorar la lectura')
+    expect(noteOf(data, 's1', 'comportamiento', 3)).toBe('Buena convivencia')
+    expect(noteOf(data, 's1', 'observaciones', 3)).toBe('Mejorar la lectura')
+    expect(noteOf(data, 's1', 'comportamiento', 2)).toBe('')
+    expect(noteOf(data, 's2', 'observaciones', 3)).toBe('')
+  })
+
+  it('go away with the student', () => {
+    const data = setNote(sample(), 's1', 'comportamiento', 1, 'Bien')
+    expect(removeStudent(data, 's1').notes.s1).toBeUndefined()
   })
 })

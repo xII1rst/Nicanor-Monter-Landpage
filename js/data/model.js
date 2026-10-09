@@ -1,4 +1,5 @@
-// Changes to the school data: groups, students, subjects and grades.
+// Changes to the school data: groups, students, subjects, grades, objetivos and
+// comportamiento/observaciones.
 // Every function returns a new data object and never changes the one it gets,
 // so the app can save exactly what it shows.
 
@@ -38,7 +39,8 @@ export function updateGroup(data, id, fields) {
 
 export function removeGroup(data, id) {
   if (data.students.some((s) => s.groupId === id)) throw new Error('Este grupo tiene estudiantes. Muévelos a otro grupo o elimínalos primero.')
-  return { ...data, groups: data.groups.filter((g) => g.id !== id) }
+  const { [id]: _removed, ...objectives } = data.objectives ?? {}
+  return { ...data, groups: data.groups.filter((g) => g.id !== id), objectives }
 }
 
 export function sortedGroups(data) {
@@ -92,7 +94,8 @@ export function updateStudent(data, id, fields) {
 
 export function removeStudent(data, id) {
   const { [id]: _removed, ...grades } = data.grades
-  return { ...data, students: data.students.filter((s) => s.id !== id), grades }
+  const { [id]: _notes, ...notes } = data.notes ?? {}
+  return { ...data, students: data.students.filter((s) => s.id !== id), grades, notes }
 }
 
 // ---------- Subjects ----------
@@ -132,11 +135,18 @@ export function removeSubject(data, id) {
       return [studentId, rest]
     }),
   )
+  const objectives = Object.fromEntries(
+    Object.entries(data.objectives ?? {}).map(([groupId, bySubject]) => {
+      const { [id]: _removed, ...rest } = bySubject
+      return [groupId, rest]
+    }),
+  )
   return {
     ...data,
     subjects: data.subjects.filter((s) => s.id !== id),
     groups: data.groups.map((g) => ({ ...g, subjectIds: g.subjectIds.filter((s) => s !== id) })),
     grades,
+    objectives,
   }
 }
 
@@ -157,4 +167,50 @@ export function completion(data, groupId, period) {
   let filled = 0
   for (const s of students) for (const subjectId of group.subjectIds) if (gradeOf(data, s.id, subjectId, period) != null) filled++
   return { filled, total: students.length * group.subjectIds.length }
+}
+
+// ---------- Objetivos (per group, subject and period; one per line) ----------
+// Files from before objetivos existed have no `objectives`: read as empty.
+
+export const objectiveOf = (data, groupId, subjectId, period) => data.objectives?.[groupId]?.[subjectId]?.[period - 1] ?? ''
+
+export function setObjective(data, groupId, subjectId, period, text) {
+  const bySubject = data.objectives?.[groupId] ?? {}
+  const periods = [...(bySubject[subjectId] ?? ['', '', '', ''])]
+  periods[period - 1] = text
+  return { ...data, objectives: { ...data.objectives, [groupId]: { ...bySubject, [subjectId]: periods } } }
+}
+
+const sharedSubjects = (data, fromId, toId) => {
+  const from = data.groups.find((g) => g.id === fromId)
+  return data.groups.find((g) => g.id === toId).subjectIds.filter((id) => from.subjectIds.includes(id))
+}
+
+/** Copies another group's objetivos for one period, for the subjects both groups have (empty ones are skipped). */
+export function copyObjectives(data, fromId, toId, period) {
+  return sharedSubjects(data, fromId, toId).reduce((acc, subjectId) => {
+    const text = objectiveOf(data, fromId, subjectId, period)
+    return text.trim() ? setObjective(acc, toId, subjectId, period, text) : acc
+  }, data)
+}
+
+/** How many objetivos already typed in the target group copyObjectives would change. */
+export function objectivesReplaced(data, fromId, toId, period) {
+  return sharedSubjects(data, fromId, toId).filter((subjectId) => {
+    const source = objectiveOf(data, fromId, subjectId, period).trim()
+    const target = objectiveOf(data, toId, subjectId, period).trim()
+    return source && target && source !== target
+  }).length
+}
+
+// ---------- Comportamiento social and observaciones (per student and period) ----------
+
+/** field: 'comportamiento' or 'observaciones' */
+export const noteOf = (data, studentId, field, period) => data.notes?.[studentId]?.[field]?.[period - 1] ?? ''
+
+export function setNote(data, studentId, field, period, text) {
+  const byField = data.notes?.[studentId] ?? {}
+  const periods = [...(byField[field] ?? ['', '', '', ''])]
+  periods[period - 1] = text
+  return { ...data, notes: { ...data.notes, [studentId]: { ...byField, [field]: periods } } }
 }

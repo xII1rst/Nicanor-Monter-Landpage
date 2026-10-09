@@ -9,7 +9,10 @@
 //   subjects: [{ id, name, area }],
 //   students: [{ id, groupId, nombre }],                        (one name, surname first)
 //   grades:   { [studentId]: { [subjectId]: [p1, p2, p3, p4] } }   (0.0 to 10.0; null = not entered yet)
+//   objectives: { [groupId]: { [subjectId]: [p1, p2, p3, p4] } }  (text, one objetivo per line)
+//   notes:    { [studentId]: { comportamiento: [p1..p4], observaciones: [p1..p4] } }   (text)
 // }
+// objectives and notes may be missing in older files; they read as empty.
 // Older files are converted when opened: version 1 used a 0 to 100 scale,
 // versions 1 and 2 split the name into apellidos and nombres (plus documento).
 
@@ -33,6 +36,8 @@ export function newDataFile(year) {
     subjects: [],
     students: [],
     grades: {},
+    objectives: {},
+    notes: {},
   }
 }
 
