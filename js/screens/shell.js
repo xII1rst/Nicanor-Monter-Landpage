@@ -7,6 +7,7 @@ export const SECTIONS = [
   ['notas', 'Notas'],
   ['objetivos', 'Objetivos'],
   ['comportamiento', 'Comportamiento'],
+  ['boletines', 'Boletines'],
   ['grupos', 'Grupos'],
   ['asignaturas', 'Asignaturas'],
   ['ajustes', 'Ajustes'],

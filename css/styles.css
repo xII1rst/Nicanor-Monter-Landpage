@@ -956,6 +956,37 @@ button:disabled {
   resize: vertical;
 }
 
+/* ---------- Boletines ---------- */
+
+.boletines {
+  max-width: 60rem;
+}
+.boletin-checks {
+  display: grid;
+  gap: 1rem;
+}
+.boletin-check {
+  padding: 1.125rem;
+  border: 1px solid var(--raya);
+  border-radius: 0.75rem;
+  background: var(--hoja);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.missing-list {
+  padding-left: 1.25rem;
+  font-size: 0.9375rem;
+}
+.missing-list li + li {
+  margin-top: 0.625rem;
+}
+@media (min-width: 900px) {
+  .boletin-checks {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
 /* ---------- Objetivos and Comportamiento ---------- */
 
 .objectives {

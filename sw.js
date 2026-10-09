@@ -48,6 +48,7 @@ const FILES = [
   'js/ui/escudo.js',
   'js/screens/ajustes.js',
   'js/screens/asignaturas.js',
+  'js/screens/boletines.js',
   'js/screens/comportamiento.js',
   'js/screens/forgot.js',
   'js/screens/frame.js',
