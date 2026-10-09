@@ -1,7 +1,7 @@
 import { average, formatGrade, parseGrade } from '../data/grades.js'
 import { completion, gradeOf, groupSubjects, setGrade, sortedGroups, studentsOf } from '../data/model.js'
 import { alertBox, button, run } from '../ui/controls.js'
-import { h } from '../ui/dom.js'
+import { h, uid } from '../ui/dom.js'
 import { pref, setPref } from '../ui/prefs.js'
 
 const PERIODS = [1, 2, 3, 4]
@@ -9,7 +9,8 @@ const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`
 
 // Grade sheet for one group and one period: students down the side (sorted by
 // name, surname first), the group's subjects across. Typing saves; Enter moves down a column,
-// so a teacher's list for one subject goes in top to bottom.
+// so a teacher's list for one subject goes in top to bottom. From period 2 on, each box
+// has the earlier periods' notas beside it in grey, as the boletín lists 1P 2P 3P.
 export function notasView(app) {
   const data = app.data
   const groups = sortedGroups(data)
@@ -83,6 +84,7 @@ export function notasView(app) {
   }
 
   const lowLimit = data.settings.levels[1].min // below Básico = desempeño Bajo
+  const earlierPeriods = PERIODS.filter((p) => p < period)
   const problems = alertBox()
   const missingCells = subjects.map(() => h('td', {}))
 
@@ -144,7 +146,18 @@ export function notasView(app) {
         }
         refreshProblems()
       })
-      return h('td', {}, input)
+      if (earlierPeriods.length === 0) return h('td', {}, input)
+
+      const values = earlierPeriods.map((p) => gradeOf(data, student.id, subject.id, p))
+      const spoken = values.map((v, i) => `${i + 1}P ${v == null ? 'sin nota' : formatGrade(v)}`).join(', ')
+      const earlier = h(
+        'span',
+        { class: 'earlier-group', id: uid('antes') },
+        h('span', { class: 'visually-hidden' }, `Periodos anteriores: ${spoken}`),
+        values.map((v) => h('span', { class: v != null && v < lowLimit ? 'earlier low' : 'earlier', 'aria-hidden': 'true' }, v == null ? '–' : formatGrade(v))),
+      )
+      input.setAttribute('aria-describedby', earlier.id)
+      return h('td', {}, h('div', { class: 'periods' }, earlier, input))
     })
 
     return h('tr', {}, h('td', { class: 'num' }, String(r + 1)), h('th', { scope: 'row', class: 'student' }, student.nombre), cells, avgCell)
@@ -152,7 +165,7 @@ export function notasView(app) {
 
   const table = h(
     'table',
-    { class: 'sheet' },
+    { class: earlierPeriods.length > 0 ? 'sheet with-earlier' : 'sheet', style: `--earlier: ${earlierPeriods.length}` },
     h('caption', { class: 'visually-hidden' }, `Notas de ${group.name}, periodo ${period}`),
     h(
       'thead',
@@ -162,7 +175,14 @@ export function notasView(app) {
         {},
         h('th', { class: 'num', scope: 'col' }, 'N°'),
         h('th', { class: 'student', scope: 'col' }, 'Estudiante'),
-        subjects.map((s) => h('th', { class: 'subject-head', scope: 'col', title: s.name }, h('span', {}, s.name))),
+        subjects.map((s) =>
+          h(
+            'th',
+            { class: 'subject-head', scope: 'col', title: s.name },
+            h('span', {}, s.name),
+            earlierPeriods.length > 0 && h('div', { class: 'periods period-labels', 'aria-hidden': 'true' }, [...earlierPeriods, period].map((p) => h('span', { class: p === period ? 'current' : null }, `${p}P`))),
+          ),
+        ),
         h('th', { scope: 'col' }, 'Promedio'),
       ),
     ),
@@ -186,7 +206,7 @@ export function notasView(app) {
     h(
       'div',
       { class: 'sheet-notes' },
-      h('p', {}, `En rojo: desempeño Bajo (menos de ${formatGrade(lowLimit)}).`),
+      h('p', {}, `En rojo: desempeño Bajo (menos de ${formatGrade(lowLimit)}).${earlierPeriods.length > 0 ? ` En gris, las notas de ${earlierPeriods.length === 1 ? 'el periodo 1' : `los periodos 1 a ${period - 1}`}.` : ''}`),
       h('p', {}, `${plural(students.length, 'estudiante', 'estudiantes')}, ${plural(subjects.length, 'asignatura', 'asignaturas')}. Enter baja a la siguiente fila.`),
     ),
   )
