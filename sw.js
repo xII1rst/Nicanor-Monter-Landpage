@@ -16,6 +16,7 @@ const FILES = [
   'css/styles.css',
   'fonts/alegreya-latin.woff2',
   'fonts/alegreya-latin-ext.woff2',
+  'fonts/alegreya-italic-latin.woff2',
   'fonts/archivo-latin.woff2',
   'fonts/archivo-latin-ext.woff2',
   'icons/icon-192.png',

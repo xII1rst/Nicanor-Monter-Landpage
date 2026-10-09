@@ -6,6 +6,8 @@ export const brand = {
   /** The name split the way official documents set it: type above, proper name below. */
   schoolType: 'Institución Educativa',
   schoolProperName: 'Nicanor Montero Arias',
+  /** The school's sign, shown under its name. */
+  motto: 'El principio de la sabiduría es el temor a Jehová',
   appName: 'Notas NMA',
   escudo: 'brand/escudo.png',
 }
