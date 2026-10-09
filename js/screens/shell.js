@@ -5,6 +5,8 @@ import { escudoMark } from '../ui/escudo.js'
 
 export const SECTIONS = [
   ['notas', 'Notas'],
+  ['objetivos', 'Objetivos'],
+  ['comportamiento', 'Comportamiento'],
   ['grupos', 'Grupos'],
   ['asignaturas', 'Asignaturas'],
   ['ajustes', 'Ajustes'],

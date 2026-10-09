@@ -12,8 +12,10 @@ import { gateScreen } from './screens/gate.js'
 import { setupScreen } from './screens/setup.js'
 import { ajustesView } from './screens/ajustes.js'
 import { asignaturasView } from './screens/asignaturas.js'
+import { comportamientoView } from './screens/comportamiento.js'
 import { gruposView } from './screens/grupos.js'
 import { notasView } from './screens/notas.js'
+import { objetivosView } from './screens/objetivos.js'
 import { saveStatusEl, shellScreen } from './screens/shell.js'
 import { startScreen } from './screens/start.js'
 import { unsupportedScreen } from './screens/unsupported.js'
@@ -29,7 +31,7 @@ if ('serviceWorker' in navigator && !local) navigator.serviceWorker.register('sw
 let session = null
 let view = 'notas'
 let saveStatus = null
-const VIEWS = { notas: notasView, grupos: gruposView, asignaturas: asignaturasView, ajustes: ajustesView }
+const VIEWS = { notas: notasView, objetivos: objetivosView, comportamiento: comportamientoView, grupos: gruposView, asignaturas: asignaturasView, ajustes: ajustesView }
 
 // What the sections use to read and change the data.
 const app = {

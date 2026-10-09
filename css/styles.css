@@ -951,6 +951,54 @@ button:disabled {
   border-color: var(--sello);
   box-shadow: 0 0 0 3px rgb(47 60 140 / 0.15);
 }
+.textarea-short {
+  min-height: 0;
+  resize: vertical;
+}
+
+/* ---------- Objetivos and Comportamiento ---------- */
+
+.objectives {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 52rem;
+}
+.copy-form {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.125rem;
+  border: 1px solid var(--raya);
+  border-radius: 0.75rem;
+  background: var(--hoja);
+}
+.note-row {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.875rem 0;
+  border-bottom: 1px solid var(--raya);
+}
+.note-head {
+  display: none;
+}
+.note-student {
+  font-weight: 500;
+}
+@media (min-width: 900px) {
+  .note-row {
+    grid-template-columns: minmax(12rem, 18rem) 1fr 1fr;
+    align-items: start;
+    gap: 1rem;
+  }
+  .note-head {
+    display: grid;
+    padding-top: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--grafito);
+  }
+  .note-student {
+    padding-top: 0.625rem;
+  }
+}
 
 /* ---------- Groups: list on the left, the chosen group on the right ---------- */
 

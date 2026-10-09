@@ -2,9 +2,9 @@ import { average, formatGrade, parseGrade } from '../data/grades.js'
 import { completion, gradeOf, groupSubjects, setGrade, sortedGroups, studentsOf } from '../data/model.js'
 import { alertBox, button, run } from '../ui/controls.js'
 import { h, uid } from '../ui/dom.js'
-import { pref, setPref } from '../ui/prefs.js'
+import { PERIODS, chosenGroup, chosenPeriod, emptyState, groupPicker, periodPicker } from '../ui/pickers.js'
+import { setPref } from '../ui/prefs.js'
 
-const PERIODS = [1, 2, 3, 4]
 const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`
 
 // Grade sheet for one group and one period: students down the side (sorted by
@@ -26,40 +26,16 @@ export function notasView(app) {
       'div',
       {},
       h('div', { class: 'page-head' }, title),
-      empty('Todavía no hay grupos. Importa una tabla de Excel con Nombre, Grado, Curso y las notas, o crea los grupos a mano.', 'Ir a Grupos', () => app.go('grupos'), importButton('secondary')),
+      emptyState('Todavía no hay grupos. Importa una tabla de Excel con Nombre, Grado, Curso y las notas, o crea los grupos a mano.', 'Ir a Grupos', () => app.go('grupos'), importButton('secondary')),
       h('div', { class: 'section-gap' }, importAlert.el),
     )
   }
 
-  const group = groups.find((g) => g.id === pref('groupId')) ?? groups[0]
-  const period = pref('period', 1)
+  const group = chosenGroup(groups)
+  const period = chosenPeriod()
   const subjects = groupSubjects(data, group)
   const students = studentsOf(data, group.id)
 
-  const groupSelect = h('select', { class: 'select', id: 'notas-grupo' }, groups.map((g) => h('option', { value: g.id }, g.name)))
-  groupSelect.value = group.id
-  groupSelect.addEventListener('change', () => {
-    setPref('groupId', groupSelect.value)
-    app.refresh()
-  })
-  const periodButtons = h(
-    'div',
-    { class: 'segmented', role: 'group', 'aria-labelledby': 'notas-periodo' },
-    PERIODS.map((p) =>
-      h(
-        'button',
-        {
-          type: 'button',
-          'aria-pressed': String(p === period),
-          onclick: () => {
-            setPref('period', p)
-            app.refresh()
-          },
-        },
-        String(p),
-      ),
-    ),
-  )
   const count = h('p', { class: 'count', role: 'status' })
   const head = h(
     'div',
@@ -68,8 +44,8 @@ export function notasView(app) {
     h(
       'div',
       { class: 'toolbar' },
-      h('div', {}, h('label', { class: 'control-label', for: 'notas-grupo' }, 'Grupo'), groupSelect),
-      h('div', {}, h('span', { class: 'control-label', id: 'notas-periodo' }, 'Periodo'), periodButtons),
+      groupPicker(app, groups, group),
+      periodPicker(app, period),
       count,
       importButton('secondary'),
     ),
@@ -77,7 +53,7 @@ export function notasView(app) {
 
   if (students.length === 0 || subjects.length === 0) {
     const missing = students.length === 0 && subjects.length === 0 ? 'estudiantes ni asignaturas' : students.length === 0 ? 'estudiantes' : 'asignaturas'
-    return h('div', {}, head, importAlert.el, empty(`${group.name} todavía no tiene ${missing}.`, `Completar ${group.name}`, () => {
+    return h('div', {}, head, importAlert.el, emptyState(`${group.name} todavía no tiene ${missing}.`, `Completar ${group.name}`, () => {
       setPref('groupId', group.id)
       app.go('grupos')
     }))
@@ -229,8 +205,4 @@ function moveWithKeys(event, table, rowCount, colCount) {
     col++
   }
   table.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`)?.focus()
-}
-
-function empty(message, actionLabel, action, extra) {
-  return h('div', { class: 'empty' }, h('p', {}, message), h('div', { class: 'empty-actions' }, button(actionLabel, { onclick: action }), extra))
 }
