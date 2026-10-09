@@ -8,7 +8,7 @@ const PERIODS = [1, 2, 3, 4]
 const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`
 
 // Grade sheet for one group and one period: students down the side (sorted by
-// apellidos), the group's subjects across. Typing saves; Enter moves down a column,
+// name, surname first), the group's subjects across. Typing saves; Enter moves down a column,
 // so a teacher's list for one subject goes in top to bottom.
 export function notasView(app) {
   const data = app.data
@@ -111,7 +111,7 @@ export function notasView(app) {
         inputmode: 'decimal',
         autocomplete: 'off',
         value: formatGrade(value),
-        'aria-label': `${subject.name}, ${student.apellidos} ${student.nombres}`,
+        'aria-label': `${subject.name}, ${student.nombre}`,
         'data-row': r,
         'data-col': c,
         'data-autofocus': value == null && !autofocusSet,
@@ -135,7 +135,7 @@ export function notasView(app) {
       return h('td', {}, input)
     })
 
-    return h('tr', {}, h('td', { class: 'num' }, String(r + 1)), h('th', { scope: 'row', class: 'student' }, `${student.apellidos}, ${student.nombres}`), cells, avgCell)
+    return h('tr', {}, h('td', { class: 'num' }, String(r + 1)), h('th', { scope: 'row', class: 'student' }, student.nombre), cells, avgCell)
   })
 
   const table = h(

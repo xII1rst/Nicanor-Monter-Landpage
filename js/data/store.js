@@ -2,20 +2,21 @@
 // stays readable in Notepad; only the password and recovery code are hashed.
 //
 // {
-//   app: 'notas-nma', version: 2,
+//   app: 'notas-nma', version: 3,
 //   settings: { schoolName, year, levels: [{ name, min, max }], lockMinutes },
 //   auth?:    { name, password: SecretHash, recovery: SecretHash },
 //   groups:   [{ id, name, gradeLevel, section, subjectIds }],   (subjectIds in boletín order)
 //   subjects: [{ id, name, area }],
-//   students: [{ id, groupId, apellidos, nombres, documento? }],
+//   students: [{ id, groupId, nombre }],                        (one name, surname first)
 //   grades:   { [studentId]: { [subjectId]: [p1, p2, p3, p4] } }   (0.0 to 10.0; null = not entered yet)
 // }
-// Version 1 files used a 0 to 100 scale; parseDataFile converts them.
+// Older files are converted when opened: version 1 used a 0 to 100 scale,
+// versions 1 and 2 split the name into apellidos and nombres (plus documento).
 
 export function newDataFile(year) {
   return {
     app: 'notas-nma',
-    version: 2,
+    version: 3,
     settings: {
       schoolName: 'Institución Educativa Nicanor Montero Arias',
       year,
@@ -49,7 +50,17 @@ export function parseDataFile(text) {
   if (!data || typeof data !== 'object' || data.app !== 'notas-nma') {
     throw new Error('Este archivo no es un archivo de Notas NMA.')
   }
-  return data.version === 1 ? fromHundredScale(data) : data
+  const v2 = data.version === 1 ? fromHundredScale(data) : data
+  return v2.version === 2 ? fromSplitNames(v2) : v2
+}
+
+/** { apellidos: 'ROJAS MEJÍA', nombres: 'SARA' } → { nombre: 'ROJAS MEJÍA SARA' }; the documento goes. */
+function fromSplitNames(data) {
+  const students = data.students.map(({ apellidos = '', nombres = '', documento: _dropped, ...rest }) => ({
+    ...rest,
+    nombre: `${apellidos} ${nombres}`.replace(/\s+/g, ' ').trim(),
+  }))
+  return { ...data, version: 3, students }
 }
 
 /** 85 → 8.5 (rounded to one decimal), with the school's default desempeños. */

@@ -10,8 +10,8 @@ function group(grades, period = 1) {
   data = addSubject(data, { name: 'Matemáticas' }, 'mat')
   data = addSubject(data, { name: 'Lengua' }, 'len')
   data = setGroupSubjects(data, 'g', ['mat', 'len'])
-  for (const [id, apellidos] of [['a', 'Arias'], ['b', 'Bravo'], ['c', 'Castro'], ['d', 'Díaz']]) {
-    data = addStudent(data, 'g', { apellidos, nombres: 'X' }, id)
+  for (const [id, nombre] of [['a', 'Arias'], ['b', 'Bravo'], ['c', 'Castro'], ['d', 'Díaz']]) {
+    data = addStudent(data, 'g', { nombre }, id)
     const [mat, len] = grades[id] ?? [null, null]
     data = setGrade(data, id, 'mat', period, mat)
     data = setGrade(data, id, 'len', period, len)
@@ -19,7 +19,7 @@ function group(grades, period = 1) {
   return data
 }
 
-const summary = (ranking) => ranking.map((r) => `${r.student.apellidos} ${r.puesto} ${r.average}`)
+const summary = (ranking) => ranking.map((r) => `${r.student.nombre} ${r.puesto} ${r.average}`)
 
 describe('rankGroup', () => {
   it('ranks by the plain average of the period, highest first', () => {
@@ -40,7 +40,7 @@ describe('rankGroup', () => {
 
   it('only looks at the period asked for', () => {
     const data = setGrade(group({ a: [100, 100], b: [50, 50], c: [60, 60], d: [70, 70] }), 'b', 'mat', 2, 100)
-    expect(rankGroup(data, 'g', 2).map((r) => `${r.student.apellidos} ${r.puesto}`)).toEqual(['Bravo 1', 'Arias null', 'Castro null', 'Díaz null'])
+    expect(rankGroup(data, 'g', 2).map((r) => `${r.student.nombre} ${r.puesto}`)).toEqual(['Bravo 1', 'Arias null', 'Castro null', 'Díaz null'])
   })
 
   it('lists students without any grade last, with no puesto', () => {
@@ -52,7 +52,7 @@ describe('rankGroup', () => {
 describe('missingGrades', () => {
   it('lists, per student, the subjects still without a grade for the period', () => {
     const data = group({ a: [70, 80], b: [90, null], c: [null, null], d: [60, 70] })
-    expect(missingGrades(data, 'g', 1).map((m) => `${m.student.apellidos}: ${m.subjects.map((s) => s.name).join(', ')}`)).toEqual([
+    expect(missingGrades(data, 'g', 1).map((m) => `${m.student.nombre}: ${m.subjects.map((s) => s.name).join(', ')}`)).toEqual([
       'Bravo: Lengua',
       'Castro: Matemáticas, Lengua',
     ])

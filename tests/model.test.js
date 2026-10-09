@@ -25,8 +25,8 @@ function sample() {
   data = addSubject(data, { name: 'Matemáticas', area: 'Matemáticas' }, 'mat')
   data = addSubject(data, { name: 'Lengua Castellana', area: 'Humanidades' }, 'len')
   data = setGroupSubjects(data, 'g6a', ['mat', 'len'])
-  data = addStudent(data, 'g6a', { apellidos: 'Zapata Ruiz', nombres: 'Ana' }, 's1')
-  data = addStudent(data, 'g6a', { apellidos: 'Álvarez Díaz', nombres: 'Luis' }, 's2')
+  data = addStudent(data, 'g6a', { nombre: 'Zapata Ruiz Ana' }, 's1')
+  data = addStudent(data, 'g6a', { nombre: 'Álvarez Díaz Luis' }, 's2')
   return data
 }
 
@@ -69,27 +69,32 @@ describe('groups', () => {
 })
 
 describe('students', () => {
-  it('lists a group’s students alphabetically by apellidos, accents included', () => {
-    expect(studentsOf(sample(), 'g6a').map((s) => s.apellidos)).toEqual(['Álvarez Díaz', 'Zapata Ruiz'])
+  it('lists a group’s students alphabetically by name (surname first), accents included', () => {
+    expect(studentsOf(sample(), 'g6a').map((s) => s.nombre)).toEqual(['Álvarez Díaz Luis', 'Zapata Ruiz Ana'])
   })
 
   it('sorts ñ after n, as in Spanish', () => {
     let data = sample()
-    data = addStudent(data, 'g6a', { apellidos: 'Ñañez Paz', nombres: 'Eva' }, 's3')
-    data = addStudent(data, 'g6a', { apellidos: 'Nuñez Paz', nombres: 'Juan' }, 's4')
-    expect(studentsOf(data, 'g6a').map((s) => s.apellidos)).toEqual(['Álvarez Díaz', 'Nuñez Paz', 'Ñañez Paz', 'Zapata Ruiz'])
+    data = addStudent(data, 'g6a', { nombre: 'Ñañez Paz Eva' }, 's3')
+    data = addStudent(data, 'g6a', { nombre: 'Nuñez Paz Juan' }, 's4')
+    expect(studentsOf(data, 'g6a').map((s) => s.nombre)).toEqual(['Álvarez Díaz Luis', 'Nuñez Paz Juan', 'Ñañez Paz Eva', 'Zapata Ruiz Ana'])
   })
 
-  it('trims names and requires apellidos and nombres', () => {
-    const data = addStudent(sample(), 'g6a', { apellidos: '  Pérez  ', nombres: ' Sofía ', documento: ' 1065 ' }, 's9')
-    expect(data.students.at(-1)).toEqual({ id: 's9', groupId: 'g6a', apellidos: 'Pérez', nombres: 'Sofía', documento: '1065' })
-    expect(() => addStudent(sample(), 'g6a', { apellidos: 'Pérez', nombres: ' ' })).toThrow('Escribe apellidos y nombres.')
+  it('keeps one name per student, trimmed and with single spaces', () => {
+    const data = addStudent(sample(), 'g6a', { nombre: '  ROJAS   CASTRO  SARA ' }, 's9')
+    expect(data.students.at(-1)).toEqual({ id: 's9', groupId: 'g6a', nombre: 'ROJAS MEJÍA SARA' })
+    expect(() => addStudent(sample(), 'g6a', { nombre: ' ' })).toThrow('Escribe el nombre del estudiante.')
+  })
+
+  it('renames a student and keeps their group', () => {
+    const data = updateStudent(sample(), 's1', { nombre: 'Zapata Ruiz Ana María' })
+    expect(data.students.find((s) => s.id === 's1')).toEqual({ id: 's1', groupId: 'g6a', nombre: 'Zapata Ruiz Ana María' })
   })
 
   it('adds a pasted list at once', () => {
     const data = addStudents(sample(), 'g6a', [
-      { apellidos: 'Bravo', nombres: 'Uno' },
-      { apellidos: 'Castro', nombres: 'Dos' },
+      { nombre: 'Bravo Uno' },
+      { nombre: 'Castro Dos' },
     ])
     expect(studentsOf(data, 'g6a').length).toBe(4)
   })

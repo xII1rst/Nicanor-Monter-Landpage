@@ -65,6 +65,34 @@ describe('parseDataFile', () => {
   })
 })
 
+describe('parseDataFile, older files', () => {
+  it('joins apellidos and nombres into one name and drops the documento (version 2 files)', () => {
+    const current = newDataFile(2026)
+    const old = {
+      ...current,
+      version: 2,
+      students: [
+        { id: 's1', groupId: 'g1', apellidos: 'ROJAS MEJÍA', nombres: 'SARA', documento: '1065' },
+        { id: 's2', groupId: 'g1', apellidos: 'Ruiz', nombres: 'Luis' },
+      ],
+    }
+    const parsed = parseDataFile(JSON.stringify(old))
+    expect(parsed.students).toEqual([
+      { id: 's1', groupId: 'g1', nombre: 'ROJAS MEJÍA SARA' },
+      { id: 's2', groupId: 'g1', nombre: 'Ruiz Luis' },
+    ])
+    expect(parsed.version).toBe(current.version)
+  })
+
+  it('converts a version 1 file all the way: scale and names', () => {
+    const current = newDataFile(2026)
+    const old = { ...current, version: 1, settings: { ...current.settings, decimals: false }, students: [{ id: 's1', groupId: 'g1', apellidos: 'Paz', nombres: 'Eva' }], grades: { s1: { m1: [90, null, null, null] } } }
+    const parsed = parseDataFile(JSON.stringify(old))
+    expect(parsed.students).toEqual([{ id: 's1', groupId: 'g1', nombre: 'Paz Eva' }])
+    expect(parsed.grades.s1.m1).toEqual([9, null, null, null])
+  })
+})
+
 describe('serializeDataFile', () => {
   it('writes indented text that is readable in Notepad', () => {
     expect(serializeDataFile(newDataFile(2026))).toContain('\n  "settings"')

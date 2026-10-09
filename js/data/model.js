@@ -49,14 +49,17 @@ export const groupSubjects = (data, group) => group.subjectIds.map((id) => data.
 
 // ---------- Students ----------
 
-export const compareStudents = (a, b) => collator.compare(a.apellidos, b.apellidos) || collator.compare(a.nombres, b.nombres)
+// Names are written surname first (ROJAS MEJÍA SARA), so this orders by apellidos.
+export const compareStudents = (a, b) => collator.compare(a.nombre, b.nombre)
 
 export const studentsOf = (data, groupId) => data.students.filter((s) => s.groupId === groupId).sort(compareStudents)
 
-function studentFields({ apellidos, nombres, documento = '' }) {
-  const clean = { apellidos: apellidos.trim(), nombres: nombres.trim() }
-  if (!clean.apellidos || !clean.nombres) throw new Error('Escribe apellidos y nombres.')
-  return documento.trim() ? { ...clean, documento: documento.trim() } : clean
+export const cleanName = (text) => text.replace(/\s+/g, ' ').trim()
+
+function studentFields({ nombre }) {
+  const clean = cleanName(nombre ?? '')
+  if (!clean) throw new Error('Escribe el nombre del estudiante.')
+  return { nombre: clean }
 }
 
 export function addStudent(data, groupId, fields, id = newId()) {
@@ -74,8 +77,7 @@ export function updateStudent(data, id, fields) {
     students: data.students.map((s) => {
       if (s.id !== id) return s
       const merged = { ...s, ...fields }
-      const { documento: _old, ...rest } = s
-      return { ...rest, groupId: merged.groupId, ...studentFields(merged) }
+      return { ...s, groupId: merged.groupId, ...studentFields(merged) }
     }),
   }
 }

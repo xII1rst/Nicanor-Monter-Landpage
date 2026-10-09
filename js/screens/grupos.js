@@ -185,7 +185,7 @@ function studentsBlock(app, group, students) {
           h(
             'table',
             { class: 'table' },
-            h('thead', {}, h('tr', {}, h('th', { class: 'num' }, 'N°'), h('th', {}, 'Apellidos'), h('th', {}, 'Nombres'), h('th', {}, 'Documento'), h('th', {}, h('span', { class: 'visually-hidden' }, 'Acciones')))),
+            h('thead', {}, h('tr', {}, h('th', { class: 'num' }, 'N°'), h('th', {}, 'Nombre'), h('th', {}, h('span', { class: 'visually-hidden' }, 'Acciones')))),
             h('tbody', {}, rows),
           ),
         )
@@ -215,14 +215,12 @@ function studentsBlock(app, group, students) {
 }
 
 function studentRow(app, student, index) {
-  const name = `${student.apellidos}, ${student.nombres}`
+  const name = student.nombre
   return h(
     'tr',
     {},
     h('td', { class: 'num' }, String(index + 1)),
-    h('td', {}, student.apellidos),
-    h('td', {}, student.nombres),
-    h('td', {}, student.documento ?? ''),
+    h('td', {}, name),
     h(
       'td',
       {},
@@ -263,9 +261,7 @@ function studentRow(app, student, index) {
 }
 
 function studentEditRow(app, student, index, groups) {
-  const apellidos = h('input', { class: 'input', value: student.apellidos, 'aria-label': 'Apellidos', 'data-focus-key': 'edit-student' })
-  const nombres = h('input', { class: 'input', value: student.nombres, 'aria-label': 'Nombres' })
-  const documento = h('input', { class: 'input', value: student.documento ?? '', 'aria-label': 'Documento' })
+  const nombre = h('input', { class: 'input', value: student.nombre, 'aria-label': 'Nombre', 'data-focus-key': 'edit-student' })
   const groupSelect = h('select', { class: 'select', 'aria-label': 'Grupo' }, groups.map((g) => h('option', { value: g.id }, g.name)))
   groupSelect.value = student.groupId
   const error = h('p', { class: 'field-error', hidden: true })
@@ -276,7 +272,7 @@ function studentEditRow(app, student, index, groups) {
   }
   const save = () => {
     try {
-      app.commit(updateStudent(app.data, student.id, { apellidos: apellidos.value, nombres: nombres.value, documento: documento.value, groupId: groupSelect.value }))
+      app.commit(updateStudent(app.data, student.id, { nombre: nombre.value, groupId: groupSelect.value }))
       close()
     } catch (e) {
       error.textContent = e.message
@@ -287,9 +283,7 @@ function studentEditRow(app, student, index, groups) {
     'tr',
     {},
     h('td', { class: 'num' }, String(index + 1)),
-    h('td', {}, apellidos, error),
-    h('td', {}, nombres),
-    h('td', {}, documento),
+    h('td', {}, nombre, error),
     h('td', {}, h('div', { class: 'row-actions' }, groupSelect, button('Guardar', { small: true, onclick: save }), button('Cancelar', { variant: 'secondary', small: true, onclick: close }))),
   )
   row.addEventListener('keydown', (e) => {
@@ -300,27 +294,23 @@ function studentEditRow(app, student, index, groups) {
 }
 
 function addStudentForm(app, group) {
-  const ids = { apellidos: uid('ap'), nombres: uid('no'), documento: uid('doc') }
-  const apellidos = h('input', { class: 'input', id: ids.apellidos, autocomplete: 'off', 'data-focus-key': 'add-student' })
-  const nombres = h('input', { class: 'input', id: ids.nombres, autocomplete: 'off' })
-  const documento = h('input', { class: 'input', id: ids.documento, autocomplete: 'off', inputmode: 'numeric' })
+  const id = uid('nombre')
+  const nombre = h('input', { class: 'input', id, autocomplete: 'off', 'data-focus-key': 'add-student' })
   const alert = alertBox()
   const form = h(
     'form',
-    { class: 'add-form', novalidate: true, style: '--cols: 3' },
-    h('div', {}, h('label', { class: 'control-label', for: ids.apellidos }, 'Apellidos'), apellidos),
-    h('div', {}, h('label', { class: 'control-label', for: ids.nombres }, 'Nombres'), nombres),
-    h('div', {}, h('label', { class: 'control-label', for: ids.documento }, 'Documento (opcional)'), documento),
+    { class: 'add-form', novalidate: true, style: '--cols: 1' },
+    h('div', {}, h('label', { class: 'control-label', for: id }, 'Nombre (apellidos y nombres)'), nombre),
     button('Agregar', { type: 'submit' }),
   )
   form.addEventListener('submit', (event) => {
     event.preventDefault()
     try {
-      app.commit(addStudent(app.data, group.id, { apellidos: apellidos.value, nombres: nombres.value, documento: documento.value }))
-      app.refresh('add-student') // back to Apellidos for the next one
+      app.commit(addStudent(app.data, group.id, { nombre: nombre.value }))
+      app.refresh('add-student') // back to the box for the next one
     } catch (error) {
       alert.show(error.message)
-      ;(apellidos.value.trim() ? nombres : apellidos).focus()
+      nombre.focus()
     }
   })
   return h('div', {}, form, h('div', { class: 'section-gap' }, alert.el))
@@ -347,11 +337,11 @@ function pasteForm(app, group) {
         h(
           'table',
           { class: 'table' },
-          h('thead', {}, h('tr', {}, h('th', {}, 'Apellidos'), h('th', {}, 'Nombres'), h('th', {}, 'Documento'))),
+          h('thead', {}, h('tr', {}, h('th', {}, 'Nombre'), h('th', {}, h('span', { class: 'visually-hidden' }, 'Problema')))),
           h(
             'tbody',
             {},
-            rows.map((r) => h('tr', { class: r.problem ? 'problem' : null }, h('td', {}, r.apellidos), h('td', {}, r.problem ?? r.nombres), h('td', {}, r.documento ?? ''))),
+            rows.map((r) => h('tr', { class: r.problem ? 'problem' : null }, h('td', {}, r.nombre), h('td', {}, r.problem ?? ''))),
           ),
         ),
       ),
@@ -363,7 +353,7 @@ function pasteForm(app, group) {
   const form = h(
     'form',
     { class: 'block section-gap', novalidate: true },
-    h('label', { class: 'control-label', for: id }, 'Copia la lista desde Excel (Apellidos y Nombres en columnas) o escribe un estudiante por línea'),
+    h('label', { class: 'control-label', for: id }, 'Copia la lista desde Excel o escribe un estudiante por línea (apellidos y nombres)'),
     textarea,
     preview,
     h(
